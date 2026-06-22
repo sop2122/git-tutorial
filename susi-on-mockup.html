@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>수시ON · 수시카드 만들기 (1~3단계 목업)</title>
+<style>
+  :root{
+    --primary:#3D5AFE; --primary-weak:#EEF1FF; --primary-line:#C7D0FF;
+    --ink:#1B1F27; --sub:#5A616E; --muted:#8B92A1; --line:#E6E9EF; --bg:#F4F6FA;
+    --안정:#1FA463; --적정:#2E7DDB; --소신:#7A4FD6; --도전:#E8862A; --위험:#E0413B;
+    --chip-bg:#F0F2F7; --ok:#1FA463; --warn:#E0413B; --radius:14px;
+    --shadow:0 1px 2px rgba(16,24,40,.04),0 4px 16px rgba(16,24,40,.06);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+    color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased;}
+  button{font-family:inherit;cursor:pointer}
+  .min-width-note{display:none}
+
+  /* ===== Header ===== */
+  header.appbar{position:sticky;top:0;z-index:30;background:#fff;border-bottom:1px solid var(--line);
+    display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:60px;}
+  .logo{display:flex;align-items:center;gap:8px;font-weight:800;font-size:18px;}
+  .logo .mark{width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,#3D5AFE,#7A4FD6);
+    display:grid;place-items:center;color:#fff;font-size:13px;font-weight:900;}
+  .logo small{font-size:11px;color:var(--muted);font-weight:600;margin-left:4px}
+  .appbar-right{display:flex;gap:8px}
+  .btn-ghost{background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 14px;font-size:13px;font-weight:600;color:var(--sub)}
+  .btn-ghost:hover{background:var(--bg)}
+
+  /* ===== Stepper ===== */
+  .stepper{background:#fff;border-bottom:1px solid var(--line);display:flex;justify-content:center;gap:8px;padding:14px 16px;}
+  .step{display:flex;align-items:center;gap:10px;opacity:.5;font-size:13.5px;font-weight:600;color:var(--sub);}
+  .step .num{width:24px;height:24px;border-radius:50%;background:var(--line);color:var(--sub);
+    display:grid;place-items:center;font-size:12px;font-weight:800;}
+  .step.active{opacity:1;color:var(--primary)}
+  .step.active .num{background:var(--primary);color:#fff}
+  .step.done{opacity:1;color:var(--ink)}
+  .step.done .num{background:var(--안정);color:#fff}
+  .step .arrow{color:var(--muted);margin:0 6px}
+
+  /* ===== Layout ===== */
+  .wrap{max-width:1440px;margin:0 auto;padding:20px;display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:start;}
+  .panel{background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);}
+  .panel-pad{padding:18px 20px}
+
+  /* ===== Intro / AI advice ===== */
+  .stage-desc{font-size:13.5px;color:var(--sub);line-height:1.6;margin:0 0 14px;}
+  .stage-title{font-size:20px;font-weight:800;margin:0 0 6px}
+  .ai-advice{display:flex;gap:12px;align-items:flex-start;background:linear-gradient(135deg,#F3F0FF,#EEF3FF);
+    border:1px solid var(--primary-line);border-radius:12px;padding:14px 16px;margin-bottom:16px;}
+  .ai-advice .ai-ic{flex:0 0 auto;width:34px;height:34px;border-radius:10px;background:#fff;display:grid;place-items:center;font-size:18px;box-shadow:var(--shadow)}
+  .ai-advice .txt{font-size:13.5px;line-height:1.6}
+  .ai-advice b{color:var(--primary)}
+  .ai-advice .note{display:block;margin-top:6px;color:var(--muted);font-size:12px}
+
+  /* ===== Filter bar ===== */
+  .filterbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;border-bottom:1px solid var(--line);padding-bottom:16px;margin-bottom:16px;}
+  .fgroup{position:relative}
+  .fgroup>.flabel{font-size:11px;color:var(--muted);font-weight:700;margin:0 0 5px 2px}
+  .dropdown{position:relative}
+  .dd-btn{display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);
+    border-radius:10px;padding:9px 12px;font-size:13px;font-weight:600;color:var(--ink);min-height:38px;}
+  .dd-btn:hover{border-color:var(--primary-line)}
+  .dd-btn.on{border-color:var(--primary);background:var(--primary-weak);color:var(--primary)}
+  .dd-btn .caret{color:var(--muted);font-size:10px}
+  .dd-panel{position:absolute;top:calc(100% + 6px);left:0;z-index:20;background:#fff;border:1px solid var(--line);
+    border-radius:12px;box-shadow:0 8px 30px rgba(16,24,40,.14);padding:10px;min-width:200px;display:none}
+  .dd-panel.open{display:block}
+  .dd-panel.cols{column-count:2;column-gap:4px}
+  .opt{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:8px;font-size:13px;break-inside:avoid}
+  .opt:hover{background:var(--bg)}
+  .opt input{accent-color:var(--primary);width:15px;height:15px}
+  .filter-sub{font-size:11px;color:var(--muted);font-weight:700;padding:6px 8px 2px}
+  .filter-block{border:1px solid var(--line);border-radius:10px;padding:6px;background:#fff}
+  .seg{display:inline-flex;background:var(--bg);border-radius:9px;padding:3px;gap:2px}
+  .seg button{border:0;background:transparent;border-radius:7px;padding:6px 12px;font-size:12.5px;font-weight:700;color:var(--sub)}
+  .seg button.on{background:#fff;color:var(--primary);box-shadow:var(--shadow)}
+
+  /* ===== List toolbar ===== */
+  .list-toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+  .tabs{display:inline-flex;gap:4px;background:var(--bg);padding:4px;border-radius:11px}
+  .tabs button{border:0;background:transparent;padding:8px 14px;border-radius:8px;font-size:13px;font-weight:700;color:var(--sub)}
+  .tabs button.on{background:#fff;color:var(--ink);box-shadow:var(--shadow)}
+  .count-pill{font-size:13px;font-weight:700;color:var(--sub)}
+  .count-pill b{color:var(--primary)}
+  .review-toggle{margin-left:auto;display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);
+    border-radius:10px;padding:8px 12px;font-size:13px;font-weight:700;color:var(--sub);position:relative}
+  .review-toggle.on{border-color:var(--primary);background:var(--primary-weak);color:var(--primary)}
+  .review-toggle .tipmark{color:var(--muted);font-size:11px;border:1px solid var(--line);border-radius:50%;width:16px;height:16px;display:grid;place-items:center}
+  .search-row{display:flex;margin-bottom:14px}
+  .search-input{flex:1;border:1px solid var(--line);border-radius:11px;padding:11px 14px;font-size:14px;outline:none}
+  .search-input:focus{border-color:var(--primary)}
+
+  /* ===== Prediction sub-tabs ===== */
+  .pred-tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+  .pred-tab{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 14px;font-size:12.5px;font-weight:700;color:var(--sub);display:inline-flex;gap:6px;align-items:center}
+  .pred-tab .dot{width:8px;height:8px;border-radius:50%}
+  .pred-tab.on{border-color:transparent;color:#fff}
+  .pred-tab.on[data-k=안정]{background:var(--안정)} .pred-tab.on[data-k=적정]{background:var(--적정)}
+  .pred-tab.on[data-k=소신]{background:var(--소신)} .pred-tab.on[data-k=도전]{background:var(--도전)}
+  .pred-tab.on[data-k=위험]{background:var(--위험)} .pred-tab.on[data-k=전체]{background:var(--ink)}
+
+  /* ===== Card list ===== */
+  .card-list{display:flex;flex-direction:column;gap:10px}
+  .dtm{display:grid;grid-template-columns:84px 1fr auto;gap:14px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:#fff;transition:.15s}
+  .dtm:hover{border-color:var(--primary-line);box-shadow:var(--shadow)}
+  .dtm.s3-pick{border-color:var(--primary-line);background:#FBFCFF}
+  .dtm.excluded{opacity:.5;background:#FAFAFB}
+  .pred-badges{display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+  .pred{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:800;padding:4px 9px;border-radius:7px;white-space:nowrap}
+  .pred .lab{font-size:9.5px;font-weight:700;opacity:.7}
+  .pred[data-k=안정]{background:#E4F6ED;color:var(--안정)} .pred[data-k=적정]{background:#E6F0FB;color:var(--적정)}
+  .pred[data-k=소신]{background:#F0EAFB;color:var(--소신)} .pred[data-k=도전]{background:#FCEFDF;color:var(--도전)}
+  .pred[data-k=위험]{background:#FBE6E5;color:var(--위험)}
+  .dtm-main .uni{font-size:15px;font-weight:800;display:flex;align-items:center;gap:8px;margin-bottom:3px}
+  .uni .logo-sq{width:22px;height:22px;border-radius:6px;background:var(--primary-weak);color:var(--primary);font-size:11px;font-weight:900;display:grid;place-items:center}
+  .dtm-main .jhmo{font-size:13px;color:var(--sub);margin-bottom:8px}
+  .meta{display:flex;flex-wrap:wrap;gap:6px}
+  .tag{font-size:11px;font-weight:700;color:var(--sub);background:var(--chip-bg);border-radius:6px;padding:3px 8px}
+  .tag .k{color:var(--muted);font-weight:600;margin-right:3px}
+  .tag.review{background:#FFF4E0;color:#B26A00}
+  .tag.dup{background:#FBE6E5;color:var(--위험)}
+  .tag.added{background:#E6F0FB;color:var(--적정)}
+  .dtm-act{display:flex;flex-direction:column;gap:6px;min-width:96px}
+  .act{border:1px solid var(--line);background:#fff;border-radius:9px;padding:8px 10px;font-size:12px;font-weight:700;color:var(--sub)}
+  .act:hover{border-color:var(--primary-line);color:var(--primary)}
+  .act.primary{background:var(--primary);border-color:var(--primary);color:#fff}
+  .act.primary:hover{background:#2f49d6}
+  .act:disabled{opacity:.45;cursor:not-allowed}
+  .act.exclude.on{background:#FBE6E5;border-color:#f2b4b1;color:var(--위험)}
+
+  /* univ-view */
+  .univ-view{display:grid;grid-template-columns:220px 1fr;gap:16px}
+  .univ-list{border:1px solid var(--line);border-radius:12px;overflow:hidden;max-height:560px;overflow-y:auto}
+  .univ-item{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:11px 13px;font-size:13px;font-weight:700;color:var(--sub);border-bottom:1px solid var(--line);cursor:pointer}
+  .univ-item:hover{background:var(--bg)}
+  .univ-item.on{background:var(--primary-weak);color:var(--primary)}
+  .univ-item .reg{font-size:11px;color:var(--muted);font-weight:600}
+  .univ-item .cnt{font-size:11px;font-weight:800}
+
+  /* ===== Footer nav ===== */
+  .stage-foot{display:flex;justify-content:space-between;gap:10px;margin-top:20px;padding-top:18px;border-top:1px solid var(--line)}
+  .btn-lg{border-radius:12px;padding:13px 24px;font-size:14.5px;font-weight:800;border:1px solid var(--line);background:#fff;color:var(--sub)}
+  .btn-lg.primary{background:var(--primary);border-color:var(--primary);color:#fff}
+  .btn-lg.primary:hover{background:#2f49d6}
+  .btn-lg:disabled{opacity:.5;cursor:not-allowed}
+  .has-tip{position:relative}
+  .tip{position:absolute;bottom:calc(100% + 8px);right:0;background:var(--ink);color:#fff;font-size:12px;font-weight:600;
+    padding:7px 11px;border-radius:8px;white-space:nowrap;opacity:0;pointer-events:none;transition:.15s;transform:translateY(4px)}
+  .has-tip:hover .tip{opacity:1;transform:none}
+
+  /* ===== Right panel ===== */
+  .side{position:sticky;top:84px;display:flex;flex-direction:column;gap:16px}
+  .side h4{font-size:13px;font-weight:800;margin:0 0 12px;display:flex;align-items:center;justify-content:space-between}
+  .side h4 .cnt{font-size:12px;color:var(--primary);font-weight:800}
+  .cart-slots{display:flex;flex-direction:column;gap:8px}
+  .slot{display:flex;align-items:center;gap:10px;border:1px dashed var(--line);border-radius:10px;padding:10px;min-height:52px;font-size:12.5px;color:var(--muted)}
+  .slot.filled{border-style:solid;background:#fff}
+  .slot .idx{width:22px;height:22px;border-radius:50%;background:var(--bg);color:var(--sub);font-size:11px;font-weight:800;display:grid;place-items:center;flex:0 0 auto}
+  .slot .info{flex:1;min-width:0}
+  .slot .info .u{font-size:12.5px;font-weight:800;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .slot .info .m{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .slot .rm{margin-left:auto;border:0;background:transparent;color:var(--muted);font-size:15px}
+  .slot .rm:hover{color:var(--위험)}
+  .dist{display:flex;gap:4px;margin-top:12px;flex-wrap:wrap}
+  .dist .d{flex:1;text-align:center;border-radius:8px;padding:6px 2px;font-size:10.5px;font-weight:800;min-width:42px}
+  .dist .d small{display:block;font-size:9px;font-weight:700;opacity:.7}
+  .dist .d[data-k=안정]{background:#E4F6ED;color:var(--안정)} .dist .d[data-k=적정]{background:#E6F0FB;color:var(--적정)}
+  .dist .d[data-k=소신]{background:#F0EAFB;color:var(--소신)} .dist .d[data-k=도전]{background:#FCEFDF;color:var(--도전)}
+  .dist .d[data-k=위험]{background:#FBE6E5;color:var(--위험)}
+  .series-row{display:flex;align-items:center;justify-content:space-between;font-size:12.5px;padding:6px 0;border-bottom:1px dashed var(--line)}
+  .series-row:last-child{border-bottom:0}
+  .series-row .name{font-weight:700;color:var(--sub)}
+  .series-row .rank{font-size:10px;background:var(--primary-weak);color:var(--primary);border-radius:5px;padding:2px 6px;font-weight:800;margin-left:6px}
+  .grade-vis{display:flex;flex-direction:column;gap:10px}
+  .bar{height:10px;border-radius:999px;background:var(--bg);overflow:hidden}
+  .bar>span{display:block;height:100%;background:linear-gradient(90deg,#3D5AFE,#7A4FD6)}
+  .grade-row{font-size:12px;display:flex;justify-content:space-between;margin-bottom:4px;color:var(--sub);font-weight:700}
+
+  /* ===== Stage3 condition summary ===== */
+  .cond-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+  .cond-card{border:1px solid var(--line);border-radius:12px;padding:14px}
+  .cond-card .ct{font-size:12px;font-weight:800;color:var(--muted);margin-bottom:8px}
+  .cond-line{font-size:13px;margin:4px 0;color:var(--sub)}
+  .cond-line b{color:var(--ink)}
+  .history{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:var(--bg);border-radius:12px;padding:14px 16px;margin-bottom:16px;font-size:13px;font-weight:700}
+  .history .h{background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 14px;text-align:center}
+  .history .h small{display:block;font-size:10.5px;color:var(--muted);font-weight:700}
+  .history .h b{font-size:16px;color:var(--primary)}
+  .history .sep{color:var(--muted)}
+  .recommend-cta{display:flex;justify-content:center;margin:8px 0 20px}
+
+  .approach-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+  .approach{border:1px solid var(--line);background:#fff;border-radius:11px;padding:10px 14px;text-align:left;min-width:120px}
+  .approach .nm{font-size:13.5px;font-weight:800}
+  .approach .ds{font-size:11px;color:var(--muted);margin-top:2px}
+  .approach.on{border-color:var(--primary);background:var(--primary-weak)}
+  .approach.on .nm{color:var(--primary)}
+
+  .empty{padding:48px 20px;text-align:center;color:var(--muted);font-size:13.5px;border:1px dashed var(--line);border-radius:12px}
+
+  .info-line{font-size:12px;color:var(--warn);font-weight:700;background:#FBE6E5;border-radius:9px;padding:9px 12px;margin-bottom:12px;display:none}
+  .info-line.show{display:block}
+
+  /* toast */
+  #toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;
+    padding:12px 20px;border-radius:12px;font-size:13.5px;font-weight:700;opacity:0;pointer-events:none;transition:.25s;z-index:60}
+  #toast.show{opacity:1;transform:translateX(-50%)}
+
+  @media (max-width:1100px){
+    .wrap{grid-template-columns:1fr}
+    .side{position:static}
+  }
+</style>
+</head>
+<body>
+
+<header class="appbar">
+  <div class="logo"><span class="mark">ON</span> 수시ON <small>수시카드 만들기</small></div>
+  <div class="appbar-right">
+    <button class="btn-ghost" onclick="toast('전공계열 재선택 — 분석정보선택(WAI-SUS-30)으로 이동')">전공계열 재선택</button>
+    <button class="btn-ghost" onclick="toast('나가기 — 수시ON 메인(WAI-SUS-20)으로 이동')">나가기</button>
+  </div>
+</header>
+
+<!-- Stepper -->
+<nav class="stepper" id="stepper">
+  <div class="step" data-s="1"><span class="num">1</span> 전체 후보 탐색</div>
+  <span class="arrow">→</span>
+  <div class="step" data-s="2"><span class="num">2</span> 정밀 추천</div>
+  <span class="arrow">→</span>
+  <div class="step" data-s="3"><span class="num">3</span> 수시카드 추천</div>
+</nav>
+
+<div class="wrap">
+  <!-- ===== LEFT: stage content ===== -->
+  <main>
+    <!-- ============ STAGE 1 ============ -->
+    <section class="panel panel-pad stage" id="stage1">
+      <h2 class="stage-title">1단계 · 전체 후보 탐색</h2>
+      <p class="stage-desc">
+        선택한 전공계열에 따른 수시카드 전체 후보 목록이에요. 직접 선택하기 어렵다면 다음 단계로 넘어가 내게 적합한 수시카드를 추천받아보세요.
+        다른 계열의 수시카드를 추천받으려면 우측 상단의 '전공 계열 재선택'을 클릭해 분석할 전공계열을 수정해주세요.
+      </p>
+
+      <div class="ai-advice">
+        <div class="ai-ic">🤖</div>
+        <div class="txt">
+          AI 분석 결과, <b>김바이브님</b>은 <b>균형형 인재</b>에요. 종합과 교과 전형의 균형을 맞춰 수시카드를 구성할 것을 추천해요.
+          <span class="note">※ 학교생활기록부 분석 기준: 경영·경제 계열 (종합 1순위)</span>
+        </div>
+      </div>
+
+      <!-- Filter bar -->
+      <div class="filterbar">
+        <div class="fgroup">
+          <div class="flabel">지역</div>
+          <div class="dropdown">
+            <button class="dd-btn" onclick="toggleDD(this)" id="regionBtn">지역 전체 <span class="caret">▼</span></button>
+            <div class="dd-panel cols" id="regionPanel">
+              <label class="opt"><input type="checkbox" onchange="pickRegionAll(this)" id="regAll"> 전체</label>
+              <label class="opt"><input type="checkbox" class="reg" onchange="syncRegion()" checked> 서울</label>
+              <label class="opt"><input type="checkbox" class="reg" onchange="syncRegion()" checked> 경기</label>
+              <label class="opt"><input type="checkbox" class="reg" onchange="syncRegion()"> 인천</label>
+              <label class="opt"><input type="checkbox" class="reg" onchange="syncRegion()"> 부산</label>
+              <label class="opt"><input type="checkbox" class="reg" onchange="syncRegion()"> 대구</label>
+              <label class="opt"><input type="checkbox" class="reg" onchange="syncRegion()"> 광주</label>
+              <label class="opt"><input type="checkbox" class="reg" onchange="syncRegion()"> 대전</label>
+              <label class="opt"><input type="checkbox" class="reg" onchange="syncRegion()"> 충북</label>
+              <label class="opt"><input type="checkbox" class="reg" onchange="syncRegion()"> 충남</label>
+              <label class="opt"><input type="checkbox" class="reg" onchange="syncRegion()"> 경북</label>
+            </div>
+          </div>
+        </div>
+        <div class="fgroup">
+          <div class="flabel">여대</div>
+          <div class="seg" id="womenSeg">
+            <button class="on" onclick="segPick(this)">포함</button>
+            <button onclick="segPick(this)">제외</button>
+          </div>
+        </div>
+        <div class="fgroup">
+          <div class="flabel">종합 전형 — 수능최저</div>
+          <div class="seg"><button class="on" onclick="segPick(this)">상관없음</button><button onclick="segPick(this)">없음</button></div>
+        </div>
+        <div class="fgroup">
+          <div class="flabel">종합 전형 — 면접</div>
+          <div class="seg"><button class="on" onclick="segPick(this)">상관없음</button><button onclick="segPick(this)">없음</button></div>
+        </div>
+        <div class="fgroup">
+          <div class="flabel">교과 전형 — 수능최저</div>
+          <div class="seg"><button class="on" onclick="segPick(this)">상관없음</button><button onclick="segPick(this)">없음</button></div>
+        </div>
+        <div class="fgroup">
+          <div class="flabel">전공계열</div>
+          <div class="dropdown">
+            <button class="dd-btn on" onclick="toggleDD(this)">경영·경제 외 2 <span class="caret">▼</span></button>
+            <div class="dd-panel" id="majorPanel">
+              <div class="filter-sub">종합 (AI 추천)</div>
+              <label class="opt"><input type="checkbox" checked> 경영·경제 <span class="rank" style="font-size:10px;color:var(--primary);font-weight:800">1순위</span></label>
+              <label class="opt"><input type="checkbox" checked> 경영정보·회계</label>
+              <label class="opt"><input type="checkbox" checked> 무역·유통</label>
+              <div class="filter-sub">교과</div>
+              <label class="opt"><input type="checkbox" checked> 경영·경제</label>
+              <label class="opt"><input type="checkbox" checked> 경영정보·회계</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- list toolbar -->
+      <div class="list-toolbar">
+        <div class="tabs" id="s1view">
+          <button class="on" onclick="setView(1,'pred')">예측별로 보기</button>
+          <button onclick="setView(1,'univ')">대학별로 보기</button>
+        </div>
+        <div class="tabs" id="s1type">
+          <button class="on" onclick="setType(1,'종합')">종합 전형</button>
+          <button onclick="setType(1,'교과')">교과 전형</button>
+        </div>
+        <span class="count-pill">수시카드 <b id="s1count">0</b>개</span>
+        <button class="review-toggle" id="reviewToggle" onclick="toggleReview()">
+          검토 후보만 보기 (<span id="reviewCount">0</span>)
+          <span class="tipmark" title="전체 후보 중 우선 살펴보면 좋은 후보를 최대 200개까지 보여줍니다. 전체 후보가 너무 많다면 검토 후보부터 살펴보세요.">?</span>
+        </button>
+      </div>
+
+      <div class="search-row">
+        <input class="search-input" placeholder="대학·전형·모집단위 입력" oninput="onSearch(1,this.value)">
+      </div>
+
+      <!-- prediction sub tabs -->
+      <div class="pred-tabs" id="s1pred">
+        <button class="pred-tab on" data-k="전체" onclick="setPred(1,'전체')">전체</button>
+        <button class="pred-tab" data-k="안정" onclick="setPred(1,'안정')"><span class="dot" style="background:var(--안정)"></span>안정 <span class="c"></span></button>
+        <button class="pred-tab" data-k="적정" onclick="setPred(1,'적정')"><span class="dot" style="background:var(--적정)"></span>적정 <span class="c"></span></button>
+        <button class="pred-tab" data-k="소신" onclick="setPred(1,'소신')"><span class="dot" style="background:var(--소신)"></span>소신 <span class="c"></span></button>
+        <button class="pred-tab" data-k="도전" onclick="setPred(1,'도전')"><span class="dot" style="background:var(--도전)"></span>도전 <span class="c"></span></button>
+        <button class="pred-tab" data-k="위험" onclick="setPred(1,'위험')"><span class="dot" style="background:var(--위험)"></span>위험 <span class="c"></span></button>
+      </div>
+
+      <div id="s1body"></div>
+
+      <div class="stage-foot">
+        <span></span>
+        <button class="btn-lg primary" onclick="goStage(2)">AI 정밀 추천 받기 →</button>
+      </div>
+    </section>
+
+    <!-- ============ STAGE 2 ============ -->
+    <section class="panel panel-pad stage" id="stage2" style="display:none">
+      <h2 class="stage-title">2단계 · 정밀 추천</h2>
+      <p class="stage-desc">
+        AI가 정밀 추천한 수시카드 리스트를 확인해보세요. 1단계 전체 후보 중 지원을 고려할 만한 검토 후보에서 한 번 더 추려진 리스트예요.
+        종합형 인재는 종합3:교과1, 균형형 인재는 1:1, 교과형 인재는 종합1:교과3의 비율로 최대 40개의 수시카드를 추천해줘요.
+        고르기 어렵다면 다음 단계로 넘어가 6장의 수시카드 추천을 받아보세요.
+      </p>
+
+      <div class="ai-advice">
+        <div class="ai-ic">🤖</div>
+        <div class="txt">
+          AI 분석 결과, <b>김바이브님</b>은 <b>균형형 인재</b>에요. 종합과 교과 전형의 균형을 맞춰 수시카드를 구성할 것을 추천해요.
+          <span class="note">※ 학교생활기록부 분석 기준: 경영·경제 계열 (종합 1순위)</span>
+        </div>
+      </div>
+
+      <div class="list-toolbar">
+        <div class="fgroup" style="min-width:230px">
+          <div class="flabel">인재 유형 (정밀 추천 비율)</div>
+          <div class="dropdown">
+            <button class="dd-btn on" onclick="toggleDD(this)" id="talentBtn">균형형 (종합 20개, 교과 20개) <span class="caret">▼</span></button>
+            <div class="dd-panel" id="talentPanel" style="min-width:240px">
+              <label class="opt"><input type="radio" name="talent" onchange="setTalent('종합형')"> 종합형 (종합 30개, 교과 10개)</label>
+              <label class="opt"><input type="radio" name="talent" checked onchange="setTalent('균형형')"> 균형형 (종합 20개, 교과 20개)</label>
+              <label class="opt"><input type="radio" name="talent" onchange="setTalent('교과형')"> 교과형 (종합 10개, 교과 30개)</label>
+            </div>
+          </div>
+        </div>
+        <span class="count-pill" style="margin-left:auto">제외한 수시카드 <b id="excludeCount">0</b>개</span>
+      </div>
+
+      <div class="list-toolbar">
+        <div class="tabs" id="s2view">
+          <button class="on" onclick="setView(2,'pred')">예측별로 보기</button>
+          <button onclick="setView(2,'univ')">대학별로 보기</button>
+        </div>
+        <div class="tabs" id="s2type">
+          <button class="on" onclick="setS2Type('전체')">전체</button>
+          <button onclick="setS2Type('종합')">종합만</button>
+          <button onclick="setS2Type('교과')">교과만</button>
+        </div>
+      </div>
+
+      <div class="search-row">
+        <input class="search-input" placeholder="대학·전형·모집단위 입력" oninput="onSearch(2,this.value)">
+      </div>
+
+      <div class="info-line show" id="s2dup">⚠️ 균형형 후보 중 고사 기간이 겹치는 전형이 있어요. 카드의 '일정 중복' 표시를 확인하세요.</div>
+
+      <div id="s2body"></div>
+
+      <div class="stage-foot">
+        <button class="btn-lg" onclick="goStage(1)">← 이전 단계로 돌아가기</button>
+        <span class="has-tip">
+          <span class="tip">균형형 인재유형으로 추천받기</span>
+          <button class="btn-lg primary" onclick="goStage(3)">3단계 수시카드 추천받기 →</button>
+        </span>
+      </div>
+    </section>
+
+    <!-- ============ STAGE 3 ============ -->
+    <section class="panel panel-pad stage" id="stage3" style="display:none">
+      <h2 class="stage-title">3단계 · 수시카드 추천</h2>
+      <p class="stage-desc">정밀 추천 후보에서 맞춤형 6장 지원안을 추천해 드릴게요. 추천 조건을 바꾸고 싶으시면, 이전 단계에서 수정해 주세요.</p>
+
+      <!-- condition history -->
+      <div class="history">
+        <div class="h"><small>전체 후보</small><b>1,284</b>개</div>
+        <span class="sep">→</span>
+        <div class="h"><small>검토 후보</small><b>200</b>개</div>
+        <span class="sep">→</span>
+        <div class="h"><small>정밀 추천 (균형형)</small><b>40</b>개</div>
+      </div>
+
+      <div class="cond-grid">
+        <div class="cond-card">
+          <div class="ct">기본 조건</div>
+          <div class="cond-line">인재유형: <b>균형형</b></div>
+          <div class="cond-line">지역: <b>서울, 경기</b></div>
+          <div class="cond-line">여대: <b>포함</b></div>
+        </div>
+        <div class="cond-card">
+          <div class="ct">종합 / 교과 전형 조건</div>
+          <div class="cond-line">종합 계열: <b>경영·경제(1지망)</b>, 경영정보·회계, 무역·유통</div>
+          <div class="cond-line">교과 계열: <b>경영·경제</b>, 경영정보·회계</div>
+          <div class="cond-line">수능최저: <b>상관없음</b> · 면접: <b>상관없음</b></div>
+        </div>
+      </div>
+
+      <div class="recommend-cta">
+        <button class="btn-lg primary" id="recBtn" onclick="runRecommend()">✨ 수시카드 추천 받기</button>
+      </div>
+
+      <div id="s3recArea" style="display:none">
+        <p class="stage-desc">수시카드에 정답은 없어요. 내 성향에 맞는 지원유형을 고르고, 추천 수시카드를 확인해보세요. 수시카드는 최대 6장까지 담을 수 있어요.</p>
+        <div class="approach-bar" id="approachBar">
+          <button class="approach on" onclick="setApproach(this,'신중 지향')"><div class="nm">신중 지향</div><div class="ds">안정·적정 구성</div></button>
+          <button class="approach" onclick="setApproach(this,'합격 지향')"><div class="nm">합격 지향</div><div class="ds">안정·적정·소신</div></button>
+          <button class="approach" onclick="setApproach(this,'적극 지향')"><div class="nm">적극 지향</div><div class="ds">소신·도전·위험</div></button>
+          <button class="approach" onclick="setApproach(this,'모험 지향')"><div class="nm">모험 지향</div><div class="ds">소신·도전·위험</div></button>
+          <button class="approach" onclick="setApproach(this,'도약 지향')"><div class="nm">도약 지향</div><div class="ds">도전·위험 구성</div></button>
+        </div>
+        <div id="s3body"></div>
+      </div>
+
+      <div class="stage-foot">
+        <button class="btn-lg" onclick="goStage(2)">← 이전 단계로 돌아가기</button>
+        <button class="btn-lg primary" onclick="saveCards()">담은 수시카드 저장하기</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===== RIGHT: persistent side panel ===== -->
+  <aside class="side">
+    <div class="panel panel-pad">
+      <h4>담은 수시카드 <span class="cnt"><span id="cartCount">0</span> / 6</span></h4>
+      <div class="cart-slots" id="cartSlots"></div>
+      <div class="dist" id="cartDist"></div>
+    </div>
+
+    <div class="panel panel-pad">
+      <h4>전공계열</h4>
+      <div class="series-row"><span class="name">경영·경제 <span class="rank">종합 1순위</span></span><span>진로역량 92점</span></div>
+      <div class="series-row"><span class="name">경영정보·회계</span><span>88점</span></div>
+      <div class="series-row"><span class="name">무역·유통</span><span>85점</span></div>
+    </div>
+
+    <div class="panel panel-pad">
+      <h4>성적 정보</h4>
+      <div class="grade-vis">
+        <div>
+          <div class="grade-row"><span>전교과 평균</span><span>2.14등급</span></div>
+          <div class="bar"><span style="width:78%"></span></div>
+        </div>
+        <div>
+          <div class="grade-row"><span>국·영·수·사·과</span><span>1.98등급</span></div>
+          <div class="bar"><span style="width:82%"></span></div>
+        </div>
+        <div>
+          <div class="grade-row"><span>진로역량 점수</span><span>92점</span></div>
+          <div class="bar"><span style="width:92%"></span></div>
+        </div>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ========= 샘플 대-전-모 데이터 ========= */
+// p1 = 종합 1차 예측 / pf = 최종 예측(교과는 최종만 사용)
+const DATA = [
+  {u:"고려대학교",reg:"서울",t:"종합",j:"학업우수전형",mo:"경영학과",naesin:"2.10",ipgyeol:"[50컷] 2.20",choejeo:true,interview:false,date:"2026-11-28",p1:"적정",pf:"소신",review:true,women:false},
+  {u:"연세대학교",reg:"서울",t:"종합",j:"활동우수형",mo:"경영학과",naesin:"2.10",ipgyeol:"[70컷] 2.35",choejeo:true,interview:true,date:"2026-12-05~2026-12-06",p1:"소신",pf:"도전",review:true,women:false},
+  {u:"성균관대학교",reg:"서울",t:"종합",j:"계열모집",mo:"경영학",naesin:"2.10",ipgyeol:"[50컷] 2.45",choejeo:false,interview:false,date:"-",p1:"적정",pf:"적정",review:true,women:false},
+  {u:"한양대학교",reg:"서울",t:"종합",j:"학생부종합(일반)",mo:"경영학부",naesin:"2.10",ipgyeol:"[평균] 2.50",choejeo:false,interview:false,date:"-",p1:"안정",pf:"적정",review:true,women:false},
+  {u:"중앙대학교",reg:"서울",t:"종합",j:"CAU융합형인재",mo:"경영학부",naesin:"2.10",ipgyeol:"[70컷] 2.60",choejeo:true,interview:true,date:"2026-11-28",p1:"안정",pf:"소신",review:true,women:false},
+  {u:"경희대학교",reg:"서울",t:"종합",j:"네오르네상스전형",mo:"경영학과",naesin:"2.10",ipgyeol:"[50컷] 2.70",choejeo:false,interview:true,date:"2026-12-05~2026-12-06",p1:"안정",pf:"적정",review:true,women:false},
+  {u:"이화여자대학교",reg:"서울",t:"종합",j:"미래인재전형",mo:"경영학부",naesin:"2.10",ipgyeol:"[70컷] 2.55",choejeo:true,interview:false,date:"-",p1:"적정",pf:"소신",review:true,women:true},
+  {u:"서강대학교",reg:"서울",t:"종합",j:"일반전형",mo:"경영학부",naesin:"2.10",ipgyeol:"[50컷] 2.40",choejeo:true,interview:false,date:"-",p1:"소신",pf:"도전",review:true,women:false},
+  {u:"건국대학교",reg:"서울",t:"종합",j:"KU자기추천전형",mo:"경영학과",naesin:"2.10",ipgyeol:"[평균] 2.85",choejeo:false,interview:true,date:"2026-11-29",p1:"안정",pf:"안정",review:false,women:false},
+  {u:"동국대학교",reg:"서울",t:"종합",j:"Do Dream전형",mo:"경영학과",naesin:"2.10",ipgyeol:"[70컷] 2.90",choejeo:false,interview:true,date:"2026-11-29",p1:"안정",pf:"적정",review:false,women:false},
+  {u:"아주대학교",reg:"경기",t:"종합",j:"ACE전형",mo:"경영학과",naesin:"2.10",ipgyeol:"[50컷] 3.00",choejeo:false,interview:false,date:"-",p1:"안정",pf:"안정",review:false,women:false},
+  {u:"인하대학교",reg:"인천",t:"종합",j:"인하미래인재",mo:"경영학과",naesin:"2.10",ipgyeol:"[평균] 3.10",choejeo:false,interview:true,date:"2026-12-06~2026-12-07",p1:"안정",pf:"안정",review:false,women:false},
+
+  {u:"고려대학교",reg:"서울",t:"교과",j:"학교추천전형",mo:"경영학과",naesin:"1.85",ipgyeol:"1.80",choejeo:true,interview:false,date:"-",pf:"소신",review:true,women:false},
+  {u:"성균관대학교",reg:"서울",t:"교과",j:"학교장추천",mo:"경영학",naesin:"1.85",ipgyeol:"1.95",choejeo:true,interview:false,date:"-",pf:"적정",review:true,women:false},
+  {u:"한양대학교",reg:"서울",t:"교과",j:"지역균형발전",mo:"경영학부",naesin:"1.85",ipgyeol:"1.90",choejeo:false,interview:false,date:"-",pf:"적정",review:true,women:false},
+  {u:"중앙대학교",reg:"서울",t:"교과",j:"지역균형전형",mo:"경영학부",naesin:"1.85",ipgyeol:"2.05",choejeo:true,interview:false,date:"-",pf:"안정",review:true,women:false},
+  {u:"경희대학교",reg:"서울",t:"교과",j:"지역균형전형",mo:"경영학과",naesin:"1.85",ipgyeol:"2.10",choejeo:true,interview:false,date:"-",pf:"안정",review:true,women:false},
+  {u:"숙명여자대학교",reg:"서울",t:"교과",j:"지역균형선발",mo:"경영학부",naesin:"1.85",ipgyeol:"2.20",choejeo:false,interview:false,date:"-",pf:"안정",review:false,women:true},
+  {u:"국민대학교",reg:"서울",t:"교과",j:"교과성적우수자",mo:"경영학부",naesin:"1.85",ipgyeol:"2.35",choejeo:false,interview:false,date:"-",pf:"안정",review:false,women:false},
+  {u:"가천대학교",reg:"경기",t:"교과",j:"지역균형",mo:"경영학부",naesin:"1.85",ipgyeol:"2.50",choejeo:false,interview:false,date:"-",pf:"안정",review:false,women:false},
+];
+DATA.forEach((d,i)=>d.id=i);
+
+const ORDER={안정:0,적정:1,소신:2,도전:3,위험:4};
+const COLORS={안정:'var(--안정)',적정:'var(--적정)',소신:'var(--소신)',도전:'var(--도전)',위험:'var(--위험)'};
+
+/* ========= state ========= */
+const state={
+  stage:1, cart:[], excluded:new Set(),
+  s1:{view:'pred',type:'종합',pred:'전체',review:false,q:''},
+  s2:{view:'pred',type:'전체',q:'',talent:'균형형'},
+  s3:{approach:'신중 지향',recommended:false},
+};
+
+/* 종합은 1차(p1)로 탭 분류, 교과는 최종(pf) */
+const classOf=(d)=> d.t==='종합' ? d.p1 : d.pf;
+
+/* ========= helpers ========= */
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2600);}
+function toggleDD(btn){const p=btn.nextElementSibling;document.querySelectorAll('.dd-panel.open').forEach(x=>{if(x!==p)x.classList.remove('open')});p.classList.toggle('open');}
+document.addEventListener('click',e=>{if(!e.target.closest('.dropdown'))document.querySelectorAll('.dd-panel.open').forEach(x=>x.classList.remove('open'));});
+function segPick(b){[...b.parentElement.children].forEach(x=>x.classList.remove('on'));b.classList.add('on');render();}
+
+function pickRegionAll(cb){document.querySelectorAll('.reg').forEach(r=>r.checked=cb.checked);updateRegionLabel();}
+function syncRegion(){const all=[...document.querySelectorAll('.reg')];document.getElementById('regAll').checked=all.every(r=>r.checked);updateRegionLabel();}
+function updateRegionLabel(){
+  const sel=[...document.querySelectorAll('.reg')].filter(r=>r.checked).map(r=>r.parentElement.textContent.trim());
+  const all=document.querySelectorAll('.reg').length;
+  let label = sel.length===all? '지역 전체' : sel.length===0? '지역 선택' : sel.length===1? sel[0] : `${sel[0]} 외 ${sel.length-1}`;
+  document.getElementById('regionBtn').firstChild.textContent=label+' ';
+}
+
+/* ========= stage nav ========= */
+function goStage(n){
+  state.stage=n;
+  for(let i=1;i<=3;i++)document.getElementById('stage'+i).style.display=(i===n)?'block':'none';
+  document.querySelectorAll('#stepper .step').forEach(s=>{
+    const sv=+s.dataset.s;s.classList.remove('active','done');
+    if(sv===n)s.classList.add('active'); else if(sv<n)s.classList.add('done');
+  });
+  window.scrollTo({top:0,behavior:'smooth'});
+  render();
+}
+
+/* ========= filters (stage1) ========= */
+function setView(stage,v){state['s'+stage].view=v;syncTabs('s'+stage+'view',v==='pred'?0:1);render();}
+function setType(stage,t){state['s'+stage].type=t;syncTabs('s'+stage+'type',t==='종합'?0:1);render();}
+function setPred(stage,p){state['s'+stage].pred=p;render();}
+function setS2Type(t){state.s2.type=t;syncTabs('s2type',{'전체':0,'종합':1,'교과':2}[t]);render();}
+function setTalent(t){
+  state.s2.talent=t;
+  const map={'종합형':'종합 30개, 교과 10개','균형형':'종합 20개, 교과 20개','교과형':'종합 10개, 교과 30개'};
+  document.getElementById('talentBtn').firstChild.textContent=`${t} (${map[t]}) `;
+  render();
+}
+function syncTabs(id,idx){[...document.getElementById(id).children].forEach((b,i)=>b.classList.toggle('on',i===idx));}
+function toggleReview(){state.s1.review=!state.s1.review;document.getElementById('reviewToggle').classList.toggle('on',state.s1.review);render();}
+function onSearch(stage,v){state['s'+stage].q=v.trim();render();}
+function setApproach(b,name){[...document.getElementById('approachBar').children].forEach(x=>x.classList.remove('on'));b.classList.add('on');state.s3.approach=name;render();}
+
+/* ========= cart ========= */
+function addCard(id){
+  if(state.cart.includes(id))return;
+  if(state.cart.length>=6){toast('수시카드는 최대 6장까지 담을 수 있어요.');return;}
+  state.cart.push(id);render();
+}
+function removeCard(id){state.cart=state.cart.filter(x=>x!==id);render();}
+function toggleExclude(id){
+  if(state.excluded.has(id))state.excluded.delete(id);else state.excluded.add(id);
+  document.getElementById('excludeCount').textContent=state.excluded.size;
+  render();
+}
+
+/* ========= recommend (stage3) ========= */
+function runRecommend(){
+  state.s3.recommended=true;
+  document.getElementById('s3recArea').style.display='block';
+  document.getElementById('recBtn').textContent='✓ 추천 완료 (지원유형을 골라보세요)';
+  render();
+}
+function saveCards(){
+  if(state.cart.length===0){toast('수시카드를 담아주세요. 최소 1개 이상 담은 후 저장할 수 있어요.');return;}
+  toast(`담아둔 수시카드 ${state.cart.length}장을 저장했어요. (저장 후 수정 불가)`);
+}
+
+/* ========= card renderer ========= */
+function predBadge(d){
+  if(d.t==='종합'){
+    return `<span class="pred" data-k="${d.p1}"><span class="lab">1차</span>${d.p1}</span>
+            <span class="pred" data-k="${d.pf}"><span class="lab">최종</span>${d.pf}</span>`;
+  }
+  return `<span class="pred" data-k="${d.pf}"><span class="lab">최종</span>${d.pf}</span>`;
+}
+function dtmCard(d,opt={}){
+  const inCart=state.cart.includes(d.id);
+  const excluded=state.excluded.has(d.id);
+  const naeLab=d.t==='종합'?'내신(전교과)':'내신(산출)';
+  const ipLab=d.t==='종합'?'입결':'합격자 예측 평균';
+  return `<div class="dtm ${opt.pick?'s3-pick':''} ${excluded?'excluded':''}">
+    <div class="pred-badges">${predBadge(d)}</div>
+    <div class="dtm-main">
+      <div class="uni"><span class="logo-sq">${d.u.slice(0,2)}</span>${d.u}</div>
+      <div class="jhmo">${d.t} · ${d.j} · ${d.mo}</div>
+      <div class="meta">
+        <span class="tag"><span class="k">${naeLab}</span>${d.naesin}</span>
+        <span class="tag"><span class="k">${ipLab}</span>${d.ipgyeol}</span>
+        <span class="tag"><span class="k">수능최저</span>${d.choejeo?'O':'X'}</span>
+        <span class="tag"><span class="k">면접</span>${d.interview?'O':'X'}</span>
+        <span class="tag"><span class="k">고사일</span>${d.date}</span>
+        ${opt.showReview&&d.review?'<span class="tag review">검토 후보</span>':''}
+        ${opt.showDup&&d.date.includes('~')?'<span class="tag dup">일정 중복</span>':''}
+      </div>
+    </div>
+    <div class="dtm-act">
+      <button class="act" onclick="toast('전형 상세정보 팝업 (WAI-SUS-P43)')">상세정보</button>
+      <button class="act" onclick="toast('${d.t}ON 리포트 새창 열기')">리포트</button>
+      ${opt.exclude
+        ? `<button class="act exclude ${excluded?'on':''}" ${inCart?'disabled':''} onclick="toggleExclude(${d.id})">${excluded?'제외 해제':'제외'}</button>`
+        : ''}
+      <button class="act primary" ${inCart||excluded?'disabled':''} onclick="addCard(${d.id})">${inCart?'담김':'담기'}</button>
+    </div>
+  </div>`;
+}
+
+/* ========= dataset selectors ========= */
+function womenIncluded(){return document.querySelector('#womenSeg .on').textContent.trim()==='포함';}
+function selectedRegions(){return [...document.querySelectorAll('.reg')].filter(r=>r.checked).map(r=>r.parentElement.textContent.trim());}
+
+function baseFilter(d){
+  const regs=selectedRegions();
+  if(regs.length && !regs.includes(d.reg))return false;
+  if(!womenIncluded() && d.women)return false;
+  return true;
+}
+
+/* 정밀추천(2단계) 비율: 균형형 종합20/교과20 등 — 데모는 검토후보 중 talent별 가공 */
+function precisionSet(){
+  let pool=DATA.filter(d=>baseFilter(d)&&d.review);
+  // talent 비율은 데모상 전체 검토후보를 노출 (개수 라벨만 반영)
+  return pool;
+}
+
+/* ========= MAIN RENDER ========= */
+function render(){
+  renderCart();
+  if(state.stage===1)renderStage1();
+  if(state.stage===2)renderStage2();
+  if(state.stage===3)renderStage3();
+}
+
+function renderStage1(){
+  const st=state.s1;
+  let pool=DATA.filter(d=>baseFilter(d)&&d.t===st.type);
+  if(st.review)pool=pool.filter(d=>d.review);
+  if(st.q)pool=pool.filter(d=>(d.u+d.j+d.mo).includes(st.q));
+
+  // counts for pred tabs (based on classification)
+  const counts={안정:0,적정:0,소신:0,도전:0,위험:0};
+  pool.forEach(d=>counts[classOf(d)]++);
+  document.querySelectorAll('#s1pred .pred-tab').forEach(b=>{
+    const k=b.dataset.k;const c=b.querySelector('.c');
+    if(c)c.textContent=k==='전체'?'':counts[k]||0;
+  });
+
+  document.getElementById('s1count').textContent=pool.length;
+  const reviewTotal=DATA.filter(d=>baseFilter(d)&&d.t===st.type&&d.review).length;
+  document.getElementById('reviewCount').textContent=reviewTotal;
+
+  let view=pool;
+  if(st.pred!=='전체')view=view.filter(d=>classOf(d)===st.pred);
+  view=[...view].sort((a,b)=>ORDER[classOf(a)]-ORDER[classOf(b)]);
+
+  const body=document.getElementById('s1body');
+  if(st.view==='univ'){body.innerHTML=univView(view);return;}
+  body.innerHTML = view.length
+    ? `<div class="card-list">${view.map(d=>dtmCard(d,{showReview:true})).join('')}</div>`
+    : `<div class="empty">조건에 맞는 후보가 없어요. 필터를 조정해보세요.</div>`;
+}
+
+function univView(list){
+  const byU={};list.forEach(d=>{(byU[d.u]=byU[d.u]||[]).push(d)});
+  const names=Object.keys(byU).sort((a,b)=>{
+    const sc=arr=>arr.reduce((s,d)=>s+({위험:100,도전:60,소신:30}[classOf(d)]||0),0)+arr.length;
+    return sc(byU[b])-sc(byU[a]);
+  });
+  if(!names.length)return `<div class="empty">조건에 맞는 후보가 없어요.</div>`;
+  const sel=state._univSel&&byU[state._univSel]?state._univSel:names[0];
+  state._univSel=sel;
+  return `<div class="univ-view">
+    <div class="univ-list">${names.map(n=>`
+      <div class="univ-item ${n===sel?'on':''}" onclick="state._univSel='${n}';render()">
+        <span>${n}<br><span class="reg">${byU[n][0].reg}</span></span><span class="cnt">${byU[n].length}개</span>
+      </div>`).join('')}</div>
+    <div class="card-list">${byU[sel].map(d=>dtmCard(d,{showReview:state.stage===1,exclude:state.stage===2,showDup:state.stage===2})).join('')}</div>
+  </div>`;
+}
+
+function renderStage2(){
+  const st=state.s2;
+  let pool=precisionSet();
+  if(st.type!=='전체')pool=pool.filter(d=>d.t===st.type);
+  if(st.q)pool=pool.filter(d=>(d.u+d.j+d.mo).includes(st.q));
+  pool=[...pool].sort((a,b)=>ORDER[classOf(a)]-ORDER[classOf(b)]);
+
+  document.getElementById('excludeCount').textContent=state.excluded.size;
+  const dup=pool.some(d=>d.date.includes('~'));
+  document.getElementById('s2dup').classList.toggle('show',dup);
+
+  const body=document.getElementById('s2body');
+  if(st.view==='univ'){body.innerHTML=univView(pool);return;}
+  body.innerHTML = pool.length
+    ? `<div class="card-list">${pool.map(d=>dtmCard(d,{exclude:true,showDup:true})).join('')}</div>`
+    : `<div class="empty">조건에 맞는 후보가 없어요.</div>`;
+}
+
+const APPROACH_PREDS={
+  '신중 지향':['안정','적정'],
+  '합격 지향':['안정','적정','소신'],
+  '적극 지향':['소신','도전','위험'],
+  '모험 지향':['소신','도전','위험'],
+  '도약 지향':['도전','위험'],
+};
+function renderStage3(){
+  if(!state.s3.recommended)return;
+  const preds=APPROACH_PREDS[state.s3.approach];
+  let pool=precisionSet().filter(d=>!state.excluded.has(d.id)).filter(d=>preds.includes(classOf(d)));
+  // 종합 → 교과 순, 각 내부 예측순
+  pool=[...pool].sort((a,b)=>{
+    if(a.t!==b.t)return a.t==='종합'?-1:1;
+    return ORDER[classOf(a)]-ORDER[classOf(b)];
+  }).slice(0,6);
+  const body=document.getElementById('s3body');
+  body.innerHTML = pool.length
+    ? `<div class="card-list">${pool.map(d=>dtmCard(d,{pick:true,showDup:true})).join('')}</div>`
+    : `<div class="empty">해당 지원유형으로 추천할 카드가 없어요. 다른 지원유형을 선택해보세요.</div>`;
+}
+
+function renderCart(){
+  const slots=document.getElementById('cartSlots');
+  document.getElementById('cartCount').textContent=state.cart.length;
+  let html='';
+  for(let i=0;i<6;i++){
+    const id=state.cart[i];
+    if(id!=null){const d=DATA[id];
+      html+=`<div class="slot filled"><span class="idx">${i+1}</span>
+        <div class="info"><div class="u">${d.u}</div><div class="m">${d.j} · ${d.mo}</div></div>
+        <button class="rm" onclick="removeCard(${id})">×</button></div>`;
+    }else{
+      html+=`<div class="slot"><span class="idx">${i+1}</span><div class="info">비어 있음</div></div>`;
+    }
+  }
+  slots.innerHTML=html;
+  // distribution
+  const dist={안정:0,적정:0,소신:0,도전:0,위험:0};
+  state.cart.forEach(id=>dist[classOf(DATA[id])]++);
+  document.getElementById('cartDist').innerHTML=Object.keys(dist).map(k=>
+    `<div class="d" data-k="${k}"><small>${k}</small>${dist[k]}</div>`).join('');
+}
+
+/* init */
+updateRegionLabel();
+goStage(1);
+</script>
+</body>
+</html>
