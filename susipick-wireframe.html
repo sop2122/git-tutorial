@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>수시PICK 소개페이지 — 와이어프레임 (1차)</title>
+<style>
+  :root{
+    --canvas:#e6e8ec;
+    --board:#ffffff;
+    --line:#cfd2d8;
+    --ink:#2b2e33;
+    --gray:#8a8f98;
+    --fill:#f1f2f4;
+    --fill2:#e7e9ed;
+    --dash:#b9bec7;
+    --pin:#ff7a00;
+    --note:#d23b3b;
+    --btn:#3a3d44;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    background:var(--canvas);
+    font-family:"Apple SD Gothic Neo","Malgun Gothic",-apple-system,sans-serif;
+    color:var(--ink); line-height:1.55; padding:40px 16px;
+  }
+  /* 캔버스 안내 */
+  .canvas-title{max-width:980px;margin:0 auto 18px;color:#5b606b;font-size:13px;font-weight:700;letter-spacing:.02em;}
+  .canvas-title span{color:var(--pin);}
+
+  /* 좌측 핀 거터 + 아트보드 레이아웃 */
+  .stage{max-width:980px;margin:0 auto;display:grid;grid-template-columns:150px 1fr;gap:0;}
+  .gutter-col{position:relative;}
+  .board{
+    background:var(--board);border:1px solid var(--line);border-radius:4px;overflow:hidden;
+    box-shadow:0 12px 40px rgba(40,45,55,.10);
+  }
+
+  /* 섹션 행: 핀(거터) + 블록 */
+  .row{display:contents;}
+  .pin-wrap{position:relative;border-right:1px dashed var(--dash);padding:26px 14px 0 0;text-align:right;}
+  .pin{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:26px;height:26px;border-radius:6px;background:var(--pin);color:#fff;
+    font-size:12px;font-weight:800;font-family:monospace;
+  }
+  .pin-note{font-size:11px;color:var(--gray);margin-top:8px;line-height:1.4;}
+  .pin-note.alert{color:var(--note);font-weight:700;}
+  .pin-note b{color:var(--ink);}
+
+  .block{padding:30px 34px;border-bottom:1px dashed var(--line);}
+  .block:last-child{border-bottom:none;}
+
+  /* 와이어프레임 프리미티브 */
+  .label{font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--gray);text-transform:uppercase;margin-bottom:10px;}
+  .wf-h{font-size:22px;font-weight:800;letter-spacing:-.01em;color:var(--ink);}
+  .wf-h.big{font-size:28px;}
+  .wf-sub{font-size:14px;color:var(--gray);margin-top:6px;}
+  .bars{margin-top:14px;}
+  .bar{height:9px;border-radius:4px;background:var(--fill2);margin:7px 0;}
+  .bar.w90{width:90%;} .bar.w75{width:75%;} .bar.w60{width:60%;} .bar.w40{width:40%;}
+
+  /* 플레이스홀더 박스 */
+  .ph{
+    border:1px dashed var(--dash);background:
+      repeating-linear-gradient(135deg,#f6f7f8,#f6f7f8 9px,#eef0f2 9px,#eef0f2 18px);
+    border-radius:6px;display:flex;align-items:center;justify-content:center;
+    color:var(--gray);font-size:12px;font-weight:700;text-align:center;padding:10px;
+  }
+  .ph.hero{height:150px;margin-top:18px;}
+  .ph.photo{height:150px;}
+  .ph.thumb{height:110px;}
+
+  /* 버튼(와이어) */
+  .wf-btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:6px;
+    border:1.5px solid var(--btn);background:#fff;color:var(--btn);
+    font-size:13px;font-weight:800;padding:12px 20px;border-radius:8px;
+  }
+  .wf-btn.solid{background:var(--btn);color:#fff;}
+  .wf-btn.block{width:100%;}
+  .btn-row{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap;}
+
+  /* GNB 바 */
+  .wf-gnb{display:flex;align-items:center;gap:16px;}
+  .wf-gnb .logo{font-weight:800;font-size:15px;border:1.5px solid var(--ink);padding:5px 10px;border-radius:6px;}
+  .wf-gnb .nav{display:flex;gap:14px;font-size:12px;color:var(--gray);font-weight:700;}
+  .wf-gnb .nav .cur{color:var(--ink);position:relative;}
+  .wf-gnb .nav .cur .soon{position:absolute;top:-12px;left:50%;transform:translateX(-50%);
+    font-size:8px;background:var(--pin);color:#fff;padding:1px 4px;border-radius:4px;white-space:nowrap;}
+  .wf-gnb .sp{flex:1;}
+
+  /* 그리드 */
+  .grid{display:grid;gap:12px;margin-top:18px;}
+  .g3{grid-template-columns:repeat(3,1fr);}
+  .g2{grid-template-columns:repeat(2,1fr);}
+  .card{border:1px solid var(--line);border-radius:8px;padding:16px;background:#fff;}
+  .card .ico{width:34px;height:34px;border:1.5px dashed var(--dash);border-radius:8px;
+    display:flex;align-items:center;justify-content:center;color:var(--gray);font-weight:800;font-size:14px;margin-bottom:10px;}
+  .card h4{font-size:14px;margin-bottom:8px;}
+  .card.locked{background:repeating-linear-gradient(45deg,#f7f8f9,#f7f8f9 8px,#eef0f2 8px,#eef0f2 16px);}
+  .card.locked h4,.card.locked .bar{opacity:.5;}
+  .tag{display:inline-block;font-size:10px;font-weight:800;color:var(--gray);border:1px solid var(--line);
+    border-radius:5px;padding:2px 7px;margin-bottom:8px;}
+
+  /* 비교표 */
+  table.wf{width:100%;border-collapse:collapse;margin-top:16px;font-size:13px;}
+  table.wf th,table.wf td{border:1px solid var(--line);padding:10px 12px;text-align:left;}
+  table.wf th{background:var(--fill);font-weight:800;}
+  table.wf td.on{background:#fff6ee;font-weight:800;border-left:2px solid var(--pin);}
+
+  /* STEP */
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px;}
+  .stepbox{border:1px solid var(--line);border-radius:8px;padding:16px;text-align:center;}
+  .stepbox .n{font-family:monospace;font-weight:800;color:var(--pin);font-size:12px;margin-bottom:8px;}
+
+  /* 가격 카드 */
+  .pricebox{border:1.5px solid var(--ink);border-radius:10px;padding:22px;text-align:center;max-width:340px;margin:18px auto 0;}
+  .pricebox .was{color:var(--gray);text-decoration:line-through;font-size:13px;}
+  .pricebox .now{font-size:30px;font-weight:800;}
+  .pricebox .now s{font-size:14px;font-weight:700;color:var(--gray);text-decoration:none;}
+
+  /* 프로모션 박스 */
+  .promo{border:2px solid var(--ink);border-radius:10px;padding:20px;display:grid;grid-template-columns:1.4fr 1fr;gap:18px;align-items:center;margin-top:6px;}
+  .promo .off{font-size:34px;font-weight:800;text-align:center;}
+  .promo .period{display:inline-block;border:1px solid var(--line);border-radius:6px;padding:4px 10px;font-size:12px;font-weight:700;margin-top:10px;}
+
+  /* 타임라인 */
+  .tl{display:flex;gap:12px;margin-top:18px;}
+  .tl .node{flex:1;border:1px solid var(--line);border-radius:8px;padding:14px;}
+  .tl .node .d{font-weight:800;font-size:14px;}
+  .tl .node .w{font-size:12px;color:var(--gray);margin-top:4px;}
+  .tl .node.now{border-color:var(--pin);border-width:1.5px;}
+
+  /* FAQ */
+  .faq-item{border:1px solid var(--line);border-radius:8px;padding:13px 15px;margin-top:10px;display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:700;}
+  .faq-item .plus{color:var(--pin);font-weight:800;}
+
+  /* 푸터 */
+  .wf-foot{background:var(--fill);text-align:center;padding:22px;color:var(--gray);font-size:12px;}
+
+  @media(max-width:820px){
+    .stage{grid-template-columns:64px 1fr;}
+    .pin-note{display:none;}
+    .promo{grid-template-columns:1fr;}
+    .g3,.steps,.tl{grid-template-columns:1fr;}
+    .block{padding:22px 18px;}
+  }
+</style>
+</head>
+<body>
+<div class="canvas-title">WIREFRAME · 수시PICK 소개페이지 <span>1차</span> &nbsp;|&nbsp; ①~⑩ = 섹션 순서 · <span style="color:var(--note)">붉은 주석</span> = 확인 필요</div>
+
+<div class="stage">
+  <div class="gutter-col"></div>
+  <div class="board">
+
+    <!-- 00 GNB -->
+    <div class="block" style="background:var(--fill);">
+      <div class="wf-gnb">
+        <span class="logo">바이브ON</span>
+        <div class="nav">
+          <span>학생부준비</span>
+          <span class="cur">수시PICK<span class="soon">COMING SOON</span></span>
+          <span>면접대비</span>
+          <span>교과ON</span>
+        </div>
+        <span class="sp"></span>
+        <span class="wf-btn" style="padding:6px 12px;font-size:11px;">로그인</span>
+      </div>
+    </div>
+
+    <!-- 01 HERO -->
+    <div class="block">
+      <div class="label">① HERO</div>
+      <div class="tag">2026.07.23 오픈 예정 · D-DAY</div>
+      <div class="wf-h big">수시의 마지막 한 끗,<br>수시PICK으로 완성하세요</div>
+      <div class="wf-sub">수시 시즌, 딱 필요한 순간에만 켜는 수시 대비 단품 서비스</div>
+      <div class="ph hero">[ 키 비주얼 이미지 영역 ]</div>
+      <div class="btn-row">
+        <span class="wf-btn solid">연간권으로 미리 만나기</span>
+        <span class="wf-btn">기능 살펴보기</span>
+      </div>
+    </div>
+
+    <!-- 02 WHY -->
+    <div class="block">
+      <div class="label">② WHY · 타깃/문제제기</div>
+      <div class="wf-h">수시 준비, 이런 고민 있으셨죠?</div>
+      <div class="wf-sub">고1·고2·고3 · 학부모 대상</div>
+      <div class="grid g3">
+        <div class="card"><div class="ico">?</div><h4>뭐부터 준비하지?</h4><div class="bars"><div class="bar w90"></div><div class="bar w60"></div></div></div>
+        <div class="card"><div class="ico">◎</div><h4>내 상황에 딱 맞게</h4><div class="bars"><div class="bar w90"></div><div class="bar w60"></div></div></div>
+        <div class="card"><div class="ico">⏱</div><h4>지금, 시즌에만</h4><div class="bars"><div class="bar w90"></div><div class="bar w60"></div></div></div>
+      </div>
+    </div>
+
+    <!-- 03 FEATURES -->
+    <div class="block">
+      <div class="label">③ WHAT · 핵심 기능 <span style="color:var(--note)">(일부 2차 공개)</span></div>
+      <div class="wf-h">수시PICK이 준비한 것</div>
+      <div class="grid g2">
+        <div class="card"><div class="ico">①</div><h4>수시 맞춤 대비 가이드</h4><div class="bars"><div class="bar w90"></div><div class="bar w75"></div></div></div>
+        <div class="card"><span class="tag">1차 비공개 · 2차 공개</span><div class="ico">②</div><h4>면접·서류 집중 대비</h4><div class="bars"><div class="bar w90"></div><div class="bar w60"></div></div></div>
+        <div class="card locked"><div class="ico">③</div><h4>●●●●● 기능</h4><div class="bars"><div class="bar w90"></div><div class="bar w75"></div></div></div>
+        <div class="card locked"><div class="ico">④</div><h4>●●●●● 기능</h4><div class="bars"><div class="bar w90"></div><div class="bar w60"></div></div></div>
+      </div>
+    </div>
+
+    <!-- 04 차별점 -->
+    <div class="block">
+      <div class="label">④ DIFFERENCE · 차별점</div>
+      <div class="wf-h">교과ON · 학종ON과 무엇이 다를까요?</div>
+      <table class="wf">
+        <tr><th>구분</th><th>교과ON / 학종ON</th><th>수시PICK</th></tr>
+        <tr><td>판매 방식</td><td>구독·연간권 중심</td><td class="on">단품 판매 가능</td></tr>
+        <tr><td>이용 시기</td><td>상시</td><td class="on">수시 시즌 한정</td></tr>
+        <tr><td>대비 성격</td><td>학생부·정량</td><td class="on">면접·수시 마무리</td></tr>
+        <tr><td>연간권</td><td>포함</td><td class="on">포함 (월구독권 미포함)</td></tr>
+      </table>
+    </div>
+
+    <!-- 05 HOW -->
+    <div class="block">
+      <div class="label">⑤ HOW · 이용 흐름</div>
+      <div class="wf-h">이렇게 이용하세요</div>
+      <div class="steps">
+        <div class="stepbox"><div class="n">STEP 1</div><h4>수시PICK 켜기</h4><div class="bar w90" style="margin:8px auto 0;"></div></div>
+        <div class="stepbox"><div class="n">STEP 2</div><h4>맞춤 대비 시작</h4><div class="bar w90" style="margin:8px auto 0;"></div></div>
+        <div class="stepbox"><div class="n">STEP 3</div><h4>면접까지 완성</h4><div class="bar w90" style="margin:8px auto 0;"></div></div>
+      </div>
+    </div>
+
+    <!-- 06 PRICE -->
+    <div class="block">
+      <div class="label">⑥ PRICE · 가격 <span style="color:var(--note)">(노출 여부 마케팅 확인)</span></div>
+      <div class="wf-h">가격 안내</div>
+      <div class="wf-sub">수시 시즌 한정 단품 · 출시 특가 예정</div>
+      <div class="pricebox">
+        <span class="tag">2026 출시 특가 (예정)</span>
+        <div class="was">정가 99,000원</div>
+        <div class="now">69,000<s>원</s></div>
+        <div class="wf-sub" style="font-size:11px;">※ 가격·할인율 확정 전, 노출 여부 검토 중</div>
+      </div>
+    </div>
+
+    <!-- 07 PROMO -->
+    <div class="block">
+      <div class="label">⑦ PROMO · 연간권 프로모션 연계 <span style="color:var(--note)">(사전예약 대체 · 핵심 CTA)</span></div>
+      <div class="promo">
+        <div>
+          <div class="wf-h">지금 연간권을 구매하면<br>수시PICK까지 함께</div>
+          <div class="wf-sub">수시PICK은 연간권에 포함. 출시 전 30% 할인 기간에 미리 준비.</div>
+          <span class="period">📅 2026.07.09 ~ 07.22 · 14일간</span>
+        </div>
+        <div style="text-align:center;">
+          <div class="off">30% OFF</div>
+          <div class="wf-sub" style="font-size:11px;">연간권 한정 할인 쿠폰</div>
+          <span class="wf-btn solid block" style="margin-top:12px;">쿠폰 받고 연간권 구매</span>
+        </div>
+      </div>
+      <div class="wf-sub" style="color:var(--note);font-size:11px;margin-top:10px;">⚠ ‘수시PICK 포함’ 홍보 문구 정합성 — 마케팅팀 확인 필요</div>
+    </div>
+
+    <!-- 08 SCHEDULE -->
+    <div class="block">
+      <div class="label">⑧ SCHEDULE · 오픈 일정</div>
+      <div class="wf-h">수시PICK 오픈 일정</div>
+      <div class="tl">
+        <div class="node"><div class="d">7/9 ~</div><div class="w">GNB 커밍쑨 + 소개페이지 1차 (연간권 프로모션 연계)</div></div>
+        <div class="node now"><div class="d">7/23</div><div class="w">정식 오픈 · 소개페이지 2차(완성본) 전환</div></div>
+      </div>
+    </div>
+
+    <!-- 09 FAQ -->
+    <div class="block">
+      <div class="label">⑨ FAQ</div>
+      <div class="wf-h">자주 묻는 질문</div>
+      <div class="faq-item"><span>수시PICK은 언제 이용할 수 있나요?</span><span class="plus">＋</span></div>
+      <div class="faq-item"><span>연간권을 사면 수시PICK도 쓸 수 있나요?</span><span class="plus">＋</span></div>
+      <div class="faq-item"><span>수시PICK만 따로 살 수 있나요?</span><span class="plus">＋</span></div>
+    </div>
+
+    <!-- 10 FOOT CTA -->
+    <div class="block" style="text-align:center;border-bottom:none;">
+      <div class="label" style="justify-content:center;">⑩ FOOTER CTA</div>
+      <div class="wf-h">수시의 마무리, 수시PICK과 함께</div>
+      <div class="wf-sub">7/9 시작되는 연간권 프로모션으로 가장 먼저 만나보세요.</div>
+      <div class="btn-row" style="justify-content:center;"><span class="wf-btn solid">연간권 프로모션 보기</span></div>
+    </div>
+
+    <div class="wf-foot">© 2026 바이브ON · 수시PICK 소개페이지 1차 와이어프레임</div>
+
+  </div>
+</div>
+</body>
+</html>
