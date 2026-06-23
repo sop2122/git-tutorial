@@ -192,6 +192,18 @@
   .price-meta { display: grid; gap: 8px; margin-top: 22px; text-align: left; font-size: 14px; }
   .price-meta li { list-style: none; padding: 10px 14px; background: var(--bg-soft); border-radius: 10px; }
   .price-meta b { color: var(--primary); }
+  /* 이용권 2종 카드 */
+  .plan-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 18px; max-width: 760px; margin: 36px auto 0; }
+  .plan { background: #fff; border: 1px solid var(--line); border-radius: 18px; padding: 28px; text-align: center; position: relative; }
+  .plan.best { border: 2px solid var(--accent); box-shadow: 0 14px 40px rgba(255,90,60,.14); }
+  .plan .badge2 { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--accent); color: #fff; font-size: 12px; font-weight: 800; padding: 4px 12px; border-radius: 999px; white-space: nowrap; }
+  .plan .pname { font-size: 16px; font-weight: 800; }
+  .plan .was2 { color: #9aa3b2; text-decoration: line-through; font-size: 15px; margin-top: 12px; }
+  .plan .now2 { font-size: 34px; font-weight: 900; letter-spacing: -.02em; }
+  .plan .now2 small { font-size: 15px; font-weight: 700; color: var(--sub); }
+  .plan .now2 .hl2 { color: var(--accent); }
+  .plan .pdesc { font-size: 13px; color: var(--sub); margin-top: 8px; }
+  .price-meta.wide { max-width: 760px; margin-left: auto; margin-right: auto; }
 
   /* 하단 스티키 프로모션 배너 (항상 노출) */
   body { padding-bottom: 78px; }
@@ -253,7 +265,7 @@
   @media (max-width: 760px) {
     section { padding: 52px 0; }
     .hero h1 { font-size: 32px; }
-    .pain-grid, .feat-grid, .steps, .steps.five, .req-grid, .kv-body { grid-template-columns: 1fr; }
+    .pain-grid, .feat-grid, .steps, .steps.five, .req-grid, .kv-body, .plan-grid { grid-template-columns: 1fr; }
     .promo .wrap { grid-template-columns: 1fr; }
     .gnb nav { display: none; }
     .timeline { flex-direction: column; gap: 26px; }
@@ -283,9 +295,9 @@
 <!-- ===== 1. HERO ===== -->
 <section class="hero">
   <div class="wrap">
-    <span class="dday">🚀 2026.07.23 정식 오픈 예정</span>
-    <h1>복잡한 수시 6장,<br><span class="hl">수시PICK</span>이 함께 정합니다</h1>
-    <p class="lead">학종ON·교과ON 분석을 통합해 최종 지원 6장을 구성하는 AI 수시 의사결정 도구</p>
+    <span class="dday">🚀 2026.07.23 오픈 예정</span>
+    <h1>고민되던 수시카드 6장,<br><span class="hl">수시PICK</span>이 골라드립니다</h1>
+    <p class="lead">컨설팅처럼 단계별로 좁혀가며, 나에게 꼭 맞는 6장을 찾아보세요</p>
     <!-- 키 비주얼: 실제 제품 '정밀추천' 화면 본뜬 미니 프리뷰 (Figma B2C 수시ON 참고) -->
     <div class="key-visual">
       <div class="kv-bar">
@@ -349,7 +361,7 @@
   <div class="wrap center">
     <span class="eyebrow">WHAT</span>
     <h2 class="title">수시PICK이 도와드립니다</h2>
-    <p class="section-sub">분석부터 최종 6장까지, 핵심 기능 5가지</p>
+    <p class="section-sub">분석부터 최종 6장 수시카드 추천까지, 핵심 기능 5가지</p>
   </div>
   <div class="wrap">
     <div class="feat-grid">
@@ -357,31 +369,31 @@
         <span class="fn">기능 1</span>
         <div class="ico">📈</div>
         <h4>내신·생기부 AI 분석</h4>
-        <p>학업·진로·공동체 역량과 성적을 분석해 상위 %와 지원 적정구간을 한눈에 제시합니다.</p>
+        <p>생기부와 성적을 AI가 분석해, 어떤 전공계열에 강점이 있는지와 내 성적 위치를 한눈에 보여드립니다.</p>
       </div>
       <div class="feat-card">
         <span class="fn">기능 2</span>
         <div class="ico">🔍</div>
         <h4>후보 탐색 · 정밀 추천</h4>
-        <p>검토 후보군 200개에서 정밀 추천 40개(교과형·균형·종합형)로 후보를 좁혀 드립니다.</p>
+        <p>검토 후보군 최대 200개에서 정밀 추천 최대 40개로 후보를 좁혀드립니다.</p>
       </div>
       <div class="feat-card">
         <span class="fn">기능 3</span>
         <div class="ico">📄</div>
-        <h4>학종ON·교과ON 통합 리포트</h4>
-        <p>대-전-모별 상세 진단 리포트를 새창·PDF로 한 곳에서 확인할 수 있습니다.</p>
+        <h4>개별 리포트 제공</h4>
+        <p>대학·전형·모집단위별 상세 진단 리포트를 제공합니다.</p>
       </div>
       <div class="feat-card">
         <span class="fn">기능 4</span>
         <div class="ico">🃏</div>
         <h4>수시카드 시나리오 추천</h4>
-        <p>안정·적정·소신·도전·위험형 5가지 6장 조합을 자동 제안하고 비교합니다.</p>
+        <p>안정·적정·소신·도전·위험 5가지 유형별로 수시카드 6장 조합을 제안합니다.</p>
       </div>
       <div class="feat-card full">
         <span class="fn">기능 5</span>
         <div class="ico">✅</div>
-        <h4>최종 지원 6장 구성 + 종합 의견서</h4>
-        <p>여러 시나리오에서 카드를 골라 ‘최종 6장’을 확정하고, 종합 경쟁력·리스크·선정 이유를 담은 수시PICK 종합 의견서를 받아보세요.</p>
+        <h4>최종 지원 6장 요약 리포트 제공</h4>
+        <p>확정한 6장에 대한 종합 요약 리포트를 제공합니다.</p>
       </div>
     </div>
   </div>
@@ -391,60 +403,47 @@
 <section>
   <div class="wrap center">
     <span class="eyebrow">HOW</span>
-    <h2 class="title">분석부터 최종 6장까지, 한 흐름으로</h2>
+    <h2 class="title">분석부터 최종 수시카드 6장까지, 한 흐름으로</h2>
     <div class="steps five">
-      <div class="step"><div class="num">1</div><h4>분석 시작</h4><p>계열 선택 또는 AI 위임으로 분석을 시작합니다.</p></div>
-      <div class="step"><div class="num">2</div><h4>후보 탐색</h4><p>200→40 정밀 추천과 상세 리포트를 살펴봅니다.</p></div>
-      <div class="step"><div class="num">3</div><h4>담기·시나리오</h4><p>최대 6장 담아 시나리오를 저장·비교합니다.</p></div>
-      <div class="step"><div class="num">4</div><h4>최종 6장 구성</h4><p>카드를 골라 ‘최종 지원 6장’을 확정합니다.</p></div>
-      <div class="step"><div class="num">5</div><h4>요약 리포트</h4><p>종합 의견서를 확인하고 PDF로 받습니다.</p></div>
+      <div class="step"><div class="num">1</div><h4>분석 시작</h4><p>계열 선택 또는 AI 추천으로 분석을 시작합니다.</p></div>
+      <div class="step"><div class="num">2</div><h4>후보 탐색</h4><p>전체 후보를 살펴보고, 필터로 원하는 조건만 추려 탐색합니다.</p></div>
+      <div class="step"><div class="num">3</div><h4>담기·시나리오 저장</h4><p>마음에 드는 카드를 담아 시나리오로 저장합니다.</p></div>
+      <div class="step"><div class="num">4</div><h4>최종 지원 6장 구성</h4><p>최종 지원 6장을 확정합니다.</p></div>
+      <div class="step"><div class="num">5</div><h4>요약 리포트</h4><p>확정한 6장의 요약 리포트를 확인합니다.</p></div>
     </div>
   </div>
 </section>
 
-<!-- ===== 5. PRICE / 가격 (노출여부 마케팅 확인 필요) ===== -->
+<!-- ===== 5. PRICE / 가격 · 이용권 ===== -->
 <section class="price">
   <div class="wrap center">
     <span class="eyebrow">PRICE</span>
-    <h2 class="title">가격 안내 <span class="pending">⚠ 노출 여부 마케팅팀 확인 필요</span></h2>
-    <p class="section-sub">수시 시즌(7~9월) 한정 판매 · 기간 내 무제한 분석 · 출시 특가 예정</p>
-    <div class="price-card">
-      <span class="tag">2026 출시 특가 (예정)</span>
-      <div class="was">정가 99,000원</div>
-      <div class="now">69,000<small>원</small></div>
-      <div class="price-note">※ 가격·할인율은 확정 전이며 노출 여부 검토 중입니다.</div>
-      <ul class="price-meta">
-        <li>이용권 · <b>연간권 / 단품 가능</b> &nbsp;|&nbsp; 월구독권 · 미포함</li>
-        <li>판매 · <b>7~9월 시즌 한정</b>, 구매 시점 무관 제공기간까지 이용</li>
-        <li>환불 · 사용 시 불가 / <b>14일 이내 미사용 시 가능</b></li>
-      </ul>
+    <h2 class="title">가격 · 이용권 안내</h2>
+    <p class="section-sub">수시 시즌(7~9월) 한정 판매 · 구매 시점 무관 제공기간까지 무제한 분석</p>
+    <div class="plan-grid">
+      <div class="plan best">
+        <span class="badge2">프로모션 7.9~7.22 · 30% 할인</span>
+        <div class="pname">연간권</div>
+        <div class="was2">정가 159,000원</div>
+        <div class="now2"><span class="hl2">111,300</span><small>원</small></div>
+        <div class="pdesc">연간권 하나로 수시PICK까지 이용</div>
+      </div>
+      <div class="plan">
+        <div class="pname">단품</div>
+        <div class="was2">정가 99,000원</div>
+        <div class="now2">69,000<small>원</small></div>
+        <div class="pdesc">수시PICK 단품 (출시 특가)</div>
+      </div>
     </div>
+    <ul class="price-meta wide">
+      <li>이용권 · <b>연간권 / 단품 가능</b> &nbsp;|&nbsp; 월구독권 · 사용 불가</li>
+      <li>판매 · <b>수시 시즌(7~9월) 한정</b>, 구매 시점 무관 제공기간까지 이용·무제한 분석</li>
+      <li>환불 · 사용 시 불가 / <b>14일 이내 미사용 시 가능</b></li>
+    </ul>
   </div>
 </section>
 
-<!-- ===== PROMO / 연간권 프로모션 연계 → 하단 스티키 배너로 이동 (사전예약 대체 · 핵심 CTA) ===== -->
-
-<!-- ===== 7. SCHEDULE / 오픈 일정 ===== -->
-<section>
-  <div class="wrap center">
-    <span class="eyebrow">SCHEDULE</span>
-    <h2 class="title">수시PICK 오픈 일정</h2>
-    <div class="timeline">
-      <div class="tl-step soft">
-        <div class="dot"></div>
-        <div class="date">7/9 ~</div>
-        <div class="what">GNB 커밍쑨 노출 + 소개페이지 1차 오픈<br>(연간권 프로모션 연계)</div>
-      </div>
-      <div class="tl-step">
-        <div class="dot"></div>
-        <div class="date">7/23</div>
-        <div class="what">수시PICK 정식 오픈<br>소개페이지 2차(완성본) 전환</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ===== 8. FAQ ===== -->
+<!-- ===== 6. FAQ ===== -->
 <section class="why">
   <div class="wrap">
     <div class="center">
@@ -452,20 +451,20 @@
       <h2 class="title">자주 묻는 질문</h2>
     </div>
     <div class="faq">
-      <details open><summary>수시PICK은 어떤 서비스인가요?</summary><p>학종ON·교과ON 분석을 통합해 후보를 탐색하고, 시나리오를 비교한 뒤 ‘최종 지원 6장’을 구성하도록 돕는 AI 수시 의사결정 도구입니다.</p></details>
-      <details><summary>어떤 기기에서 이용하나요?</summary><p>PC·태블릿 전용 서비스입니다. 모바일에서는 이용이 불가하며 안내문구가 노출됩니다. (소개페이지는 모바일에서도 보실 수 있습니다.)</p></details>
-      <details><summary>누가 이용할 수 있나요?</summary><p>2015 개정(9등급제) 고3·N수생·학부모가 대상이며, 특성화·마이스터·영재고는 제외됩니다. 로그인·분석정보·이용권과 생기부(비교과 2-2, 교과 3-1) 업로드가 필요합니다.</p></details>
-      <details><summary>이용권/구매는 어떻게 되나요?</summary><p>연간권 또는 수시PICK 단품으로 이용할 수 있으며, 월구독권에는 포함되지 않습니다. 수시 시즌(7~9월) 한정 판매입니다.</p></details>
-      <details><summary>환불이 되나요?</summary><p>이미 사용한 경우 환불이 불가하며, 14일 이내 미사용 시 환불이 가능합니다.</p></details>
+      <details open><summary>수시PICK은 어떤 서비스인가요?</summary><p>전체 후보를 탐색하고 비교해, ‘최종 지원 6장’을 구성하도록 돕는 AI 수시 의사결정 도구입니다.</p></details>
+      <details><summary>어떤 기기에서 이용하나요?</summary><p>PC와 태블릿에서 이용하실 수 있습니다. (모바일은 지원하지 않습니다.)</p></details>
+      <details><summary>누가 이용할 수 있나요?</summary><p>2015 개정 교육과정(9등급제) 적용 대상인 현재 고3·N수생을 위한 서비스입니다. 일부 고등학교(특성화고, 마이스터고, 영재고 등)는 사용이 불가능합니다.</p></details>
+      <details><summary>이용권/구매는 어떻게 되나요?</summary><p>연간권 또는 수시PICK 단품 구매 후 이용할 수 있으며, 월 구독권은 사용할 수 없습니다. 수시 시즌(7~9월) 한정 판매입니다.</p></details>
+      <details><summary>환불이 되나요?</summary><p>이미 사용한 경우 환불이 불가하며, 14일 이내 미사용 시 환불 가능합니다.</p></details>
     </div>
   </div>
 </section>
 
-<!-- ===== 9. FOOTER CTA ===== -->
+<!-- ===== 7. FOOTER CTA (1차 기간에만 노출) ===== -->
 <section class="foot-cta">
   <div class="wrap">
-    <h2>수시의 마무리, 수시PICK과 함께</h2>
-    <p>7/9 시작되는 연간권 프로모션으로 가장 먼저 만나보세요.</p>
+    <h2>수시 6장의 마무리, 수시PICK과 함께</h2>
+    <p>연간권 프로모션으로 가장 합리적인 가격에 만나보세요</p>
     <a href="#promo" class="btn btn-ghost btn-lg" style="color:var(--primary)">연간권 프로모션 보기</a>
   </div>
 </section>
