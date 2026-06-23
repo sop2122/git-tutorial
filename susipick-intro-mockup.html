@@ -193,6 +193,26 @@
   .price-meta li { list-style: none; padding: 10px 14px; background: var(--bg-soft); border-radius: 10px; }
   .price-meta b { color: var(--primary); }
 
+  /* 하단 스티키 프로모션 배너 (항상 노출) */
+  body { padding-bottom: 78px; }
+  .sticky-promo {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 60;
+    background: linear-gradient(135deg, #ff5a3c 0%, #ff8a5b 100%); color: #fff;
+    box-shadow: 0 -8px 30px rgba(40,20,10,.22);
+  }
+  .sticky-promo .sp-inner { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 12px 20px; }
+  .sticky-promo .sp-info { display: flex; align-items: center; gap: 14px; min-width: 0; }
+  .sticky-promo .sp-badge { flex: none; font-weight: 900; font-size: 14px; background: rgba(0,0,0,.2); padding: 7px 13px; border-radius: 999px; white-space: nowrap; }
+  .sticky-promo .sp-text { font-size: 15px; opacity: .97; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .sticky-promo .sp-text b { font-weight: 800; }
+  .sticky-promo .sp-btn { flex: none; background: #fff; color: var(--accent); font-weight: 800; padding: 12px 22px; border-radius: 10px; }
+  @media (max-width: 760px) {
+    body { padding-bottom: 116px; }
+    .sticky-promo .sp-inner { flex-direction: column; align-items: stretch; gap: 8px; padding: 12px 16px; }
+    .sticky-promo .sp-text { white-space: normal; }
+    .sticky-promo .sp-btn { text-align: center; }
+  }
+
   /* PROMO (연간권 프로모션 연계 — 1차 핵심 CTA) */
   .promo { background: linear-gradient(135deg, #ff5a3c 0%, #ff8a5b 100%); color: #fff; }
   .promo .wrap { display: grid; grid-template-columns: 1.4fr 1fr; gap: 32px; align-items: center; }
@@ -424,25 +444,7 @@
   </div>
 </section>
 
-<!-- ===== 6. PROMO / 연간권 프로모션 연계 (사전예약 대체 · 1차 핵심 CTA) ===== -->
-<section class="promo" id="promo">
-  <div class="wrap">
-    <div>
-      <span class="eyebrow">LIMITED · 7.9 ~ 7.22</span>
-      <h2>지금 연간권을 구매하면<br>수시PICK까지 함께 누립니다</h2>
-      <p>수시PICK은 연간권에 포함됩니다. 출시 전 연간권 30% 할인 기간에 미리 준비하세요.</p>
-      <span class="period">📅 2026.07.09(목) ~ 07.22(수) · 14일간</span>
-      <p style="margin-top:14px; font-size:13px; opacity:.85;">
-        ⚠ 홍보 문구(‘수시PICK 포함’ 표현 등) 정합성 — 마케팅팀 확인 필요
-      </p>
-    </div>
-    <div class="cta-box">
-      <div class="off">30%<span style="font-size:20px"> OFF</span></div>
-      <div class="desc">연간권 한정 할인 쿠폰</div>
-      <a href="#" class="btn btn-accent btn-lg">쿠폰 받고 연간권 구매하기</a>
-    </div>
-  </div>
-</section>
+<!-- ===== PROMO / 연간권 프로모션 연계 → 하단 스티키 배너로 이동 (사전예약 대체 · 핵심 CTA) ===== -->
 
 <!-- ===== 7. SCHEDULE / 오픈 일정 ===== -->
 <section>
@@ -493,5 +495,16 @@
 <footer class="site">
   <div class="wrap">© 2026 바이브ON · 본 페이지는 수시PICK 소개페이지 1차 목업입니다.</div>
 </footer>
+
+<!-- ===== 하단 스티키 프로모션 배너 (항상 노출 · 사전예약 대체 핵심 CTA) ===== -->
+<div class="sticky-promo" id="promo">
+  <div class="wrap sp-inner">
+    <div class="sp-info">
+      <span class="sp-badge">7.9~7.22 한정 · 30% 할인</span>
+      <span class="sp-text"><b>연간권</b> 하나로 <b>수시PICK까지</b> 이용 — 이 기간에 구매하면 <b>30% 할인가</b>로</span>
+    </div>
+    <a href="#" class="btn btn-accent sp-btn">30% 할인가로 연간권 구매</a>
+  </div>
+</div>
 </body>
 </html>

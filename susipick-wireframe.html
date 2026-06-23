@@ -125,6 +125,22 @@
 
   .wf-foot{background:var(--fill);text-align:center;padding:22px;color:var(--gray);font-size:12px;}
 
+  /* 하단 스티키 프로모션 배너 */
+  body{padding-bottom:70px;}
+  .sticky-promo{position:fixed;left:0;right:0;bottom:0;z-index:60;background:#fff;border-top:2px solid var(--ink);box-shadow:0 -6px 20px rgba(40,45,55,.14);}
+  .sticky-promo .sp-inner{max-width:980px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 20px;}
+  .sticky-promo .sp-info{display:flex;align-items:center;gap:12px;min-width:0;flex-wrap:wrap;}
+  .sticky-promo .sp-badge{flex:none;font-weight:800;font-size:13px;border:1.5px solid var(--ink);border-radius:999px;padding:5px 12px;white-space:nowrap;}
+  .sticky-promo .sp-text{font-size:14px;color:var(--ink);}
+  .sticky-promo .sp-text b{font-weight:800;}
+  .sticky-promo .sp-note{font-size:11px;color:var(--note);font-weight:700;}
+  .sticky-promo .sp-btn{flex:none;}
+  @media(max-width:820px){
+    body{padding-bottom:120px;}
+    .sticky-promo .sp-inner{flex-direction:column;align-items:stretch;gap:8px;}
+    .sticky-promo .sp-btn{width:100%;}
+  }
+
   @media(max-width:820px){
     .stage{grid-template-columns:24px 1fr;}
     .promo{grid-template-columns:1fr;}
@@ -233,27 +249,11 @@
       </div>
     </div>
 
-    <!-- 08 PROMO -->
-    <div class="block">
-      <div class="label">⑦ PROMO · 연간권 프로모션 연계 <span style="color:var(--note)">(사전예약 대체 · 핵심 CTA)</span></div>
-      <div class="promo">
-        <div>
-          <div class="wf-h">지금 연간권을 구매하면<br>수시PICK까지 함께</div>
-          <div class="wf-sub">수시PICK은 연간권에 포함. 출시 전 30% 할인 기간에 미리 준비.</div>
-          <span class="period">📅 2026.07.09 ~ 07.22 · 14일간</span>
-        </div>
-        <div style="text-align:center;">
-          <div class="off">30% OFF</div>
-          <div class="wf-sub" style="font-size:11px;">연간권 한정 할인 쿠폰</div>
-          <span class="wf-btn solid block" style="margin-top:12px;">쿠폰 받고 연간권 구매</span>
-        </div>
-      </div>
-      <div class="wf-sub" style="color:var(--note);font-size:11px;margin-top:10px;">⚠ ‘수시PICK 포함’ 홍보 문구 정합성 — 마케팅팀 확인 필요</div>
-    </div>
+    <!-- PROMO · 연간권 프로모션 연계 → 하단 스티키 배너로 이동 (사전예약 대체 · 핵심 CTA) -->
 
-    <!-- 09 SCHEDULE -->
+    <!-- 07 SCHEDULE -->
     <div class="block">
-      <div class="label">⑧ SCHEDULE · 오픈 일정</div>
+      <div class="label">⑦ SCHEDULE · 오픈 일정</div>
       <div class="wf-h">수시PICK 오픈 일정</div>
       <div class="tl">
         <div class="node"><div class="d">7/9 ~</div><div class="w">GNB 커밍쑨 + 소개페이지 1차 (연간권 프로모션 연계)</div></div>
@@ -263,7 +263,7 @@
 
     <!-- 10 FAQ -->
     <div class="block">
-      <div class="label">⑨ FAQ</div>
+      <div class="label">⑧ FAQ</div>
       <div class="wf-h">자주 묻는 질문</div>
       <div class="faq-item"><span>수시PICK은 어떤 서비스인가요? (최종 지원 6장 의사결정)</span><span class="plus">＋</span></div>
       <div class="faq-item"><span>어떤 기기에서 이용하나요? (PC·태블릿 전용)</span><span class="plus">＋</span></div>
@@ -274,7 +274,7 @@
 
     <!-- 11 FOOT CTA -->
     <div class="block" style="text-align:center;border-bottom:none;">
-      <div class="label" style="justify-content:center;">⑩ FOOTER CTA</div>
+      <div class="label" style="justify-content:center;">⑨ FOOTER CTA</div>
       <div class="wf-h">수시 6장의 마무리, 수시PICK과 함께</div>
       <div class="wf-sub">7/9 시작되는 연간권 프로모션으로 가장 먼저 만나보세요.</div>
       <div class="btn-row" style="justify-content:center;"><span class="wf-btn solid">연간권 프로모션 보기</span></div>
@@ -282,6 +282,18 @@
 
     <div class="wf-foot">© 2026 바이브ON · 수시PICK 소개페이지 1차 와이어프레임 (스펙 기반 업데이트)</div>
 
+  </div>
+</div>
+
+<!-- 하단 스티키 프로모션 배너 (항상 노출 · 사전예약 대체 핵심 CTA) -->
+<div class="sticky-promo">
+  <div class="sp-inner">
+    <div class="sp-info">
+      <span class="sp-badge">7.9~7.22 한정 · 30% 할인</span>
+      <span class="sp-text"><b>연간권</b> 하나로 <b>수시PICK까지</b> 이용 — 이 기간에 구매하면 <b>30% 할인가</b></span>
+      <span class="sp-note">⚠ ‘수시PICK 포함’ 문구 정합성 — 마케팅 확인</span>
+    </div>
+    <span class="wf-btn solid sp-btn">30% 할인가로 연간권 구매</span>
   </div>
 </div>
 </body>
