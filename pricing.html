@@ -148,6 +148,17 @@
   .rv .who { margin-top: 16px; display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--ink-3); }
   .rv .who .v { font-size: 11px; font-weight: 800; color: var(--green); background: #E6FAF1; padding: 2px 8px; border-radius: 999px; }
 
+  /* ---- FAQ accordion ---- */
+  .faq { margin-top: 64px; }
+  .faq-wrap { margin-top: 24px; border-top: 1px solid var(--line); }
+  .faq-item { border-bottom: 1px solid var(--line); }
+  .faq-item summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 20px 4px; font-size: 15.5px; font-weight: 700; color: var(--ink); }
+  .faq-item summary::-webkit-details-marker { display: none; }
+  .faq-item summary .plus { flex-shrink: 0; font-size: 22px; font-weight: 400; color: var(--ink-3); transition: transform .2s; line-height: 1; }
+  .faq-item[open] summary .plus { transform: rotate(45deg); color: var(--purple); }
+  .faq-item .ans { padding: 0 4px 22px; font-size: 14px; color: var(--ink-2); line-height: 1.75; }
+  .faq-item .ans b { color: var(--ink); }
+
   @media (max-width: 880px) {
     .title { font-size: 32px; letter-spacing: -1px; }
     .cards, .cards.two { grid-template-columns: 1fr; max-width: 460px; margin-left: auto; margin-right: auto; }
@@ -354,6 +365,48 @@
         </tbody>
       </table>
     </details>
+
+    <!-- FAQ -->
+    <section class="sec faq">
+      <div class="sec-h">
+        <div class="ey">궁금한 점이 있나요?</div>
+        <h2>자주 묻는 질문</h2>
+      </div>
+      <div class="faq-wrap">
+        <details class="faq-item">
+          <summary>바이브온 패스 멤버스 채널이 무엇인가요?<span class="plus">+</span></summary>
+          <div class="ans">바이브온 패스(연간권) 구매 시 제공되는 <b>패스 회원 전용 입시 채널</b>입니다. 카카오톡으로 입시 핵심 정보와 뉴스를 매일 받아보고 Q&amp;A에 참여할 수 있으며, 멤버스 전용 유튜브 라이브 Q&amp;A 세션에도 참여할 수 있습니다. <b>26학년 한시 혜택</b>으로 27년 2월 28일까지 운영됩니다.</div>
+        </details>
+        <details class="faq-item">
+          <summary>수시ON은 언제부터 사용할 수 있나요?<span class="plus">+</span></summary>
+          <div class="ans">수시ON은 <b>2026년 7월 23일부터 9월 13일까지</b> 운영됩니다.</div>
+        </details>
+        <details class="faq-item">
+          <summary>환불은 어떻게 받을 수 있나요?<span class="plus">+</span></summary>
+          <div class="ans"><b>결제 후 14일 이내, 미사용 시 전액 환불</b>됩니다. [구매관리 &gt; 상세보기]에서 직접 신청할 수 있고 영업일 기준 3~5일 내 처리됩니다. 결제 후 14일이 지났거나 이미 사용한 경우에는 환불이 어렵습니다.</div>
+        </details>
+        <details class="faq-item">
+          <summary>수시ON 단품과 연간권의 차이가 무엇인가요?<span class="plus">+</span></summary>
+          <div class="ans"><b>단품</b>은 수시ON 한 가지만 7/23~9/13 동안 이용하는 상품입니다. <b>바이브온 패스(연간권)</b>는 수시ON을 포함해 생기부·탐구·학종·교과·면접ON 전체를 1년간 이용할 수 있습니다.</div>
+        </details>
+        <details class="faq-item">
+          <summary>계정 하나로 여러 명이 사용할 수 있나요?<span class="plus">+</span></summary>
+          <div class="ans">아니요, 이용권은 <b>1인 1계정 전용</b>입니다. 계정 공유 및 양도는 이용약관에 따라 금지되어 있으며, 적발 시 서비스 이용이 제한될 수 있습니다.</div>
+        </details>
+        <details class="faq-item">
+          <summary>고1·고2도 이용할 수 있나요?<span class="plus">+</span></summary>
+          <div class="ans">네. 현재는 9등급제 변환 등급을 제공하며, 개편된 5등급제에 맞춘 전용 교과전형 서비스를 준비 중입니다.</div>
+        </details>
+        <details class="faq-item">
+          <summary>한시적 혜택이 있나요?<span class="plus">+</span></summary>
+          <div class="ans">한시적으로 <b>[면접 영상 연습]을 무제한 제공</b>하고 있습니다. 추후 제공 방식이 변경되거나 종료될 수 있습니다.</div>
+        </details>
+        <details class="faq-item">
+          <summary>모든 대학·전형·모집단위를 분석할 수 있나요?<span class="plus">+</span></summary>
+          <div class="ans">분석 가능한 대학·전형·모집단위는 구매 페이지 및 FAQ 페이지에서 확인하실 수 있습니다.</div>
+        </details>
+      </div>
+    </section>
 
     <p class="fine">
       ※ 수시ON은 단품 또는 바이브온 패스(연간권) 구매 시에만 사용할 수 있습니다.<br>
