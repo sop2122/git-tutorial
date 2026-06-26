@@ -3,337 +3,265 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>가격 · 이용권 안내 (개선 프로토타입)</title>
+<title>요금제 (ChatGPT 스타일 프로토타입)</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   :root {
-    --primary: #2C6BF0;
-    --primary-soft: #EAF1FE;
-    --accent: #FF6B35;
-    --accent-soft: #FFEDE5;
-    --ink: #1B2330;
-    --ink-2: #545C6B;
-    --ink-3: #9AA1AE;
-    --line: #E8EBF1;
-    --bg: #EEF1F6;
-    --white: #fff;
-    --ok: #22A06B;
-    --no: #D14343;
-    --radius: 16px;
-    --shadow-sm: 0 1px 3px rgba(27,35,48,.07);
-    --shadow-md: 0 10px 30px rgba(27,35,48,.10);
-    --shadow-blue: 0 16px 40px rgba(44,107,240,.28);
+    --ink: #0D0D0D;
+    --ink-2: #3D3D3D;
+    --ink-3: #8E8E8E;
+    --line: #E3E3E3;
+    --line-2: #ECECEC;
+    --bg: #FFFFFF;
+    --bg-soft: #F7F7F8;
+    --tint: #F4F1FD;        /* featured card subtle tint */
+    --tint-line: #D9CEF7;
+    --accent: #6D45E8;      /* restrained brand accent */
+    --ok: #0D0D0D;
+    --radius: 18px;
   }
   body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Helvetica Neue', sans-serif;
     background: var(--bg); color: var(--ink); line-height: 1.5; -webkit-font-smoothing: antialiased;
   }
-  .wrap { max-width: 1000px; margin: 0 auto; padding: 40px 20px 80px; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 56px 24px 96px; }
 
-  /* ---- Demo phase switcher (not part of product UI) ---- */
+  /* demo phase switcher */
   .demo-bar {
-    max-width: 1000px; margin: 0 auto 8px; padding: 10px 20px; display: flex;
-    align-items: center; gap: 10px; flex-wrap: wrap; font-size: 13px; color: var(--ink-3);
+    max-width: 1080px; margin: 0 auto; padding: 12px 24px 0; display: flex; gap: 8px;
+    align-items: center; flex-wrap: wrap; font-size: 12.5px; color: var(--ink-3);
   }
-  .demo-bar strong { color: var(--ink-2); }
   .demo-bar button {
     border: 1px solid var(--line); background: #fff; color: var(--ink-2); cursor: pointer;
-    font-size: 12.5px; font-weight: 600; padding: 7px 12px; border-radius: 999px; transition: .15s;
+    font-size: 12px; font-weight: 600; padding: 6px 11px; border-radius: 999px; transition: .15s;
   }
   .demo-bar button.on { background: var(--ink); color: #fff; border-color: var(--ink); }
 
-  /* ---- Section head ---- */
-  .head { display: flex; align-items: center; gap: 12px; justify-content: center; }
-  .head .num {
-    width: 30px; height: 30px; border-radius: 50%; background: var(--accent); color: #fff;
-    font-weight: 800; display: flex; align-items: center; justify-content: center; font-size: 15px;
+  /* head */
+  .title { text-align: center; font-size: 34px; font-weight: 700; letter-spacing: -1px; }
+  .lede { text-align: center; color: var(--ink-3); margin-top: 12px; font-size: 16px; }
+
+  /* time-limited inline notice (kept minimal, ChatGPT-like) */
+  .notice {
+    margin: 22px auto 0; width: max-content; max-width: 100%; display: flex; gap: 9px; align-items: center;
+    font-size: 13px; color: var(--ink-2); background: var(--bg-soft); border: 1px solid var(--line);
+    padding: 9px 16px; border-radius: 999px;
   }
-  .head h1 { font-size: 28px; font-weight: 800; letter-spacing: -.7px; }
-  .sub { text-align: center; color: var(--ink-2); margin-top: 10px; font-size: 15px; }
-  .sub b { color: var(--primary); }
+  .notice .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
+  .notice b { color: var(--ink); }
 
-  /* ---- Period banner (the time-limited story) ---- */
-  .period {
-    margin: 22px auto 0; max-width: 760px; border-radius: 14px; padding: 14px 18px;
-    display: flex; align-items: center; gap: 14px; justify-content: center; font-size: 14px;
-    background: var(--accent-soft); color: #9A3412; border: 1px solid #FCD9C8;
+  /* cards */
+  .cards { margin-top: 40px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; align-items: stretch; }
+  .cards.two { grid-template-columns: repeat(2, 1fr); max-width: 720px; margin-left: auto; margin-right: auto; }
+
+  .card {
+    position: relative; background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 28px 26px; display: flex; flex-direction: column;
   }
-  .period .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
-  .period.calm { background: var(--primary-soft); color: #1E4FAE; border-color: #CBDBFB; }
-  .period.calm .dot { background: var(--primary); }
-  .period b { font-weight: 800; }
+  .card.featured { background: var(--tint); border-color: var(--tint-line); }
 
-  /* ---- Comparison table ---- */
-  .table { margin-top: 26px; background: #fff; border-radius: var(--radius); box-shadow: var(--shadow-sm); overflow: hidden; }
-  table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-  th, td { padding: 16px 14px; text-align: center; border-bottom: 1px solid var(--line); font-size: 14px; vertical-align: middle; }
-  tr:last-child td { border-bottom: none; }
-  th.feat-col, td.feat-col { text-align: left; width: 19%; color: var(--ink-2); font-weight: 600; background: #FAFBFD; }
-
-  /* plan header cells */
-  thead th { background: #FAFBFD; vertical-align: top; padding-top: 22px; padding-bottom: 22px; position: relative; }
-  .p-name { font-size: 15px; font-weight: 800; }
-  .p-name .tail { font-weight: 600; color: var(--ink-3); font-size: 13px; }
-  .p-strike { display: block; margin-top: 10px; font-size: 12.5px; color: var(--ink-3); text-decoration: line-through; min-height: 16px; }
-  .p-price { display: block; font-size: 22px; font-weight: 800; letter-spacing: -.5px; margin-top: 2px; }
-  .p-price.blue { color: var(--primary); }
-  .p-badge {
-    display: inline-block; margin-top: 8px; font-size: 11px; font-weight: 800; padding: 3px 9px;
-    border-radius: 999px; background: var(--accent-soft); color: var(--accent);
+  .pill {
+    position: absolute; top: 22px; right: 22px; font-size: 11px; font-weight: 700; letter-spacing: .3px;
+    padding: 4px 10px; border-radius: 999px; background: var(--accent); color: #fff;
   }
-  .p-badge.coming { background: #EEF1F6; color: var(--ink-3); }
+  .pill.muted { background: #ECECEC; color: var(--ink-3); }
 
-  /* featured (연간권) column */
-  thead th.featured { background: var(--primary); color: #fff; border-radius: 14px 14px 0 0; box-shadow: var(--shadow-blue); }
-  thead th.featured .p-name, thead th.featured .p-price { color: #fff; }
-  thead th.featured .p-strike { color: #C7D9FB; }
-  thead th.featured .p-badge { background: rgba(255,255,255,.2); color: #fff; }
-  td.featured-col { background: var(--primary-soft); }
-  tbody tr td.featured-col { box-shadow: inset 0 0 0 0 transparent; }
+  .pname { font-size: 19px; font-weight: 700; }
+  .pdesc { margin-top: 4px; font-size: 13.5px; color: var(--ink-3); min-height: 38px; }
 
-  /* the hero row: 수시ON */
-  tr.hero td { background: #FFF7F2; }
-  tr.hero td.feat-col { color: var(--accent); font-weight: 800; }
-  tr.hero td.featured-col { background: #DCE8FE; }
+  .price-line { margin-top: 18px; display: flex; align-items: baseline; gap: 7px; flex-wrap: wrap; }
+  .price { font-size: 34px; font-weight: 700; letter-spacing: -1px; }
+  .per { font-size: 14px; color: var(--ink-3); font-weight: 500; }
+  .strike { font-size: 14px; color: var(--ink-3); text-decoration: line-through; }
+  .price-note { margin-top: 6px; font-size: 12.5px; color: var(--accent); font-weight: 600; min-height: 18px; }
 
-  .yes { color: var(--ok); font-weight: 800; font-size: 16px; }
-  .no { color: var(--no); font-weight: 800; font-size: 16px; }
-  .meta { font-size: 12.5px; color: var(--ink-2); line-height: 1.55; }
-  .meta .hl { color: var(--accent); font-weight: 700; }
+  .btn {
+    margin-top: 22px; width: 100%; padding: 13px; border-radius: 999px; font-size: 14.5px; font-weight: 700;
+    cursor: pointer; border: 1px solid var(--ink); background: var(--ink); color: #fff; transition: .15s;
+  }
+  .btn:hover { opacity: .88; }
+  .btn.outline { background: #fff; color: var(--ink); }
+  .btn.outline:hover { background: var(--bg-soft); opacity: 1; }
+  .btn:disabled { background: #F2F2F2; color: var(--ink-3); border-color: var(--line); cursor: not-allowed; }
 
-  .col-hide { display: none !important; }
+  .feat-head { margin-top: 24px; font-size: 13px; font-weight: 700; color: var(--ink-2); }
+  .feats { margin-top: 12px; list-style: none; display: flex; flex-direction: column; gap: 11px; }
+  .feats li { display: flex; gap: 10px; font-size: 13.5px; color: var(--ink-2); align-items: flex-start; }
+  .feats .ic { flex-shrink: 0; width: 16px; height: 16px; margin-top: 1px; }
+  .feats li.off { color: var(--ink-3); }
+  .feats li.off .ic { opacity: .5; }
 
-  /* ---- CTAs ---- */
-  .ctas { display: grid; gap: 12px; margin-top: 18px; grid-template-columns: 1.4fr 1fr; }
-  .cta { padding: 16px; border-radius: 12px; font-size: 16px; font-weight: 800; cursor: pointer; border: none; transition: .2s; }
-  .cta.primary { background: var(--accent); color: #fff; }
-  .cta.primary:hover { filter: brightness(.95); }
-  .cta.ghost { background: #fff; color: var(--ink-2); border: 1.5px solid var(--line); }
-  .cta.ghost:disabled { color: var(--ink-3); cursor: not-allowed; background: #F4F6F9; }
-  .cta.ghost:not(:disabled):hover { border-color: var(--primary); color: var(--primary); }
+  /* full comparison (ChatGPT-style expandable) */
+  .more { margin-top: 48px; }
+  .more summary {
+    cursor: pointer; list-style: none; text-align: center; font-size: 14px; font-weight: 600;
+    color: var(--ink); border: 1px solid var(--line); border-radius: 999px; padding: 12px 22px; width: max-content;
+    margin: 0 auto; transition: .15s;
+  }
+  .more summary::-webkit-details-marker { display: none; }
+  .more summary:hover { background: var(--bg-soft); }
+  .more summary::after { content: " ↓"; color: var(--ink-3); }
+  .more[open] summary::after { content: " ↑"; }
+  table { width: 100%; border-collapse: collapse; margin-top: 22px; }
+  th, td { padding: 14px 12px; text-align: center; border-bottom: 1px solid var(--line-2); font-size: 13.5px; }
+  th.f, td.f { text-align: left; color: var(--ink-2); font-weight: 600; width: 28%; }
+  thead th { font-weight: 700; }
+  .yes { font-weight: 800; }
+  .nope { color: var(--ink-3); }
+  .col-single.hide { display: none; }
 
-  .reassure { margin-top: 12px; display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; font-size: 12.5px; color: var(--ink-3); }
+  .fine { margin-top: 40px; text-align: center; font-size: 12px; color: var(--ink-3); line-height: 1.8; }
 
-  /* ---- Chooser helper ---- */
-  .chooser { margin-top: 40px; }
-  .chooser h2 { text-align: center; font-size: 20px; font-weight: 800; margin-bottom: 16px; }
-  .cards { display: grid; gap: 12px; grid-template-columns: repeat(3,1fr); }
-  .ccard { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 18px; }
-  .ccard .q { font-size: 14px; font-weight: 700; color: var(--ink); }
-  .ccard .a { margin-top: 8px; font-size: 13.5px; color: var(--ink-2); }
-  .ccard .pick { display: inline-block; margin-top: 12px; font-size: 12.5px; font-weight: 800; padding: 5px 11px; border-radius: 999px; background: var(--primary-soft); color: var(--primary); }
-  .ccard .pick.accent { background: var(--accent-soft); color: var(--accent); }
-
-  .footnote { margin-top: 30px; text-align: center; font-size: 12px; color: var(--ink-3); line-height: 1.7; }
-
-  /* ---- Mobile: stack the table into cards ---- */
-  @media (max-width: 760px) {
-    .head h1 { font-size: 22px; }
-    table, thead, tbody, th, td, tr { display: block; }
-    thead { display: none; }
-    .table { background: transparent; box-shadow: none; }
-    tbody { display: grid; gap: 14px; }
-    /* group rows back into per-plan cards is complex in pure CSS table; instead show feature label + 3 values inline */
-    tr { background: #fff; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
-    td { display: flex; justify-content: space-between; text-align: right; border-bottom: 1px solid var(--line); padding: 12px 14px; }
-    td.feat-col { background: #FAFBFD; font-weight: 700; }
-    td::before { content: attr(data-col); color: var(--ink-3); font-size: 12px; font-weight: 600; text-align: left; }
-    td.feat-col::before { content: ""; }
-    .ctas, .cards { grid-template-columns: 1fr; }
+  @media (max-width: 860px) {
+    .title { font-size: 26px; }
+    .cards, .cards.two { grid-template-columns: 1fr; max-width: 460px; margin-left: auto; margin-right: auto; }
+    .pdesc { min-height: 0; }
   }
 </style>
 </head>
 <body>
 
-  <!-- Demo-only control: preview how the page adapts over time -->
   <div class="demo-bar">
-    <strong>🛠 미리보기:</strong> 단품 판매 시점에 따라 화면이 바뀝니다 —
+    🛠 미리보기:
     <button data-phase="before" class="on">① 오픈 예정 (~7/22)</button>
     <button data-phase="sale">② 단품 판매중 (7/23~9/13)</button>
     <button data-phase="after">③ 판매 종료 (9/14~)</button>
   </div>
 
   <div class="wrap">
-    <div class="head">
-      <span class="num">4</span>
-      <h1>가격 · 이용권 안내</h1>
-    </div>
-    <p class="sub"><b>수시ON</b>은 <b>단품</b> 또는 <b>바이브온 패스(연간권)</b> 구매 시에만 사용 가능합니다.</p>
+    <h1 class="title">나에게 맞는 요금제를 선택하세요</h1>
+    <p class="lede">수시·생기부·탐구·학종·교과·면접까지, 입시 준비를 하나로</p>
 
-    <!-- Time-limited messaging changes per phase -->
-    <div class="period" id="period">
-      <span class="dot"></span>
-      <span id="period-text"></span>
+    <div class="notice"><span class="dot"></span><span id="notice-text"></span></div>
+
+    <div class="cards" id="cards">
+
+      <!-- 구독형 -->
+      <article class="card">
+        <div class="pname">바이브온 플랜</div>
+        <div class="pdesc">월 단위로 유연하게 쓰는 구독형</div>
+        <div class="price-line">
+          <span class="price">29,900원</span><span class="per">/ 월</span>
+        </div>
+        <div class="price-note">&nbsp;</div>
+        <button class="btn outline" onclick="alert('데모: 구독 시작')">구독 시작하기</button>
+        <div class="feat-head">다음을 사용할 수 있어요</div>
+        <ul class="feats">
+          <li><svg class="ic" viewBox="0 0 16 16"><path fill="currentColor" d="M6.2 11.3 2.9 8l1.1-1.1 2.2 2.2 5-5L12.3 5z"/></svg>생기부ON · 탐구ON</li>
+          <li><svg class="ic" viewBox="0 0 16 16"><path fill="currentColor" d="M6.2 11.3 2.9 8l1.1-1.1 2.2 2.2 5-5L12.3 5z"/></svg>학종ON · 교과ON · 면접ON</li>
+          <li><svg class="ic" viewBox="0 0 16 16"><path fill="currentColor" d="M6.2 11.3 2.9 8l1.1-1.1 2.2 2.2 5-5L12.3 5z"/></svg>언제든 해지 가능 (구매일~1달)</li>
+          <li class="off"><svg class="ic" viewBox="0 0 16 16"><path fill="currentColor" d="M4.7 4.7 8 8l3.3-3.3 .9.9L8.9 8.9l3.3 3.3-.9.9L8 9.8l-3.3 3.3-.9-.9L7.1 8.9 3.8 5.6z"/></svg>수시ON 미포함</li>
+        </ul>
+      </article>
+
+      <!-- 연간권 (featured) -->
+      <article class="card featured">
+        <span class="pill">인기</span>
+        <div class="pname">바이브온 패스</div>
+        <div class="pdesc">1년 내내 입시 전체를 관리하는 연간권</div>
+        <div class="price-line">
+          <span class="strike">159,000원</span>
+          <span class="price">111,300원</span><span class="per">/ 년</span>
+        </div>
+        <div class="price-note">30% 할인 · 월 환산 약 9,275원</div>
+        <button class="btn" onclick="alert('데모: 연간권 구매')">연간권 구매하기</button>
+        <div class="feat-head">다음을 사용할 수 있어요</div>
+        <ul class="feats">
+          <li><svg class="ic" viewBox="0 0 16 16"><path fill="currentColor" d="M6.2 11.3 2.9 8l1.1-1.1 2.2 2.2 5-5L12.3 5z"/></svg><b>수시ON</b> (26.07.23~26.09.13)</li>
+          <li><svg class="ic" viewBox="0 0 16 16"><path fill="currentColor" d="M6.2 11.3 2.9 8l1.1-1.1 2.2 2.2 5-5L12.3 5z"/></svg>생기부·탐구·학종·교과·면접 ON 전체</li>
+          <li><svg class="ic" viewBox="0 0 16 16"><path fill="currentColor" d="M6.2 11.3 2.9 8l1.1-1.1 2.2 2.2 5-5L12.3 5z"/></svg>구매일로부터 1년 이용</li>
+          <li><svg class="ic" viewBox="0 0 16 16"><path fill="currentColor" d="M6.2 11.3 2.9 8l1.1-1.1 2.2 2.2 5-5L12.3 5z"/></svg>멤버스 채널 · 입시 자료 정기 제공</li>
+        </ul>
+      </article>
+
+      <!-- 단품 -->
+      <article class="card col-single" id="card-single">
+        <span class="pill" id="single-pill">한정</span>
+        <div class="pname">단품</div>
+        <div class="pdesc">수시 시즌만 빠르게, 가장 저렴하게</div>
+        <div class="price-line">
+          <span class="strike">99,000원</span>
+          <span class="price">69,000원</span>
+        </div>
+        <div class="price-note" id="single-note">7/23~9/13 한정 판매</div>
+        <button class="btn outline" id="single-btn" onclick="alert('데모: 단품 구매')">단품 구매하기</button>
+        <div class="feat-head">다음을 사용할 수 있어요</div>
+        <ul class="feats">
+          <li><svg class="ic" viewBox="0 0 16 16"><path fill="currentColor" d="M6.2 11.3 2.9 8l1.1-1.1 2.2 2.2 5-5L12.3 5z"/></svg><b>수시ON</b> (26.07.23~26.09.13)</li>
+          <li class="off"><svg class="ic" viewBox="0 0 16 16"><path fill="currentColor" d="M4.7 4.7 8 8l3.3-3.3 .9.9L8.9 8.9l3.3 3.3-.9.9L8 9.8l-3.3 3.3-.9-.9L7.1 8.9 3.8 5.6z"/></svg>생기부·탐구·학종·교과·면접 미포함</li>
+          <li class="off"><svg class="ic" viewBox="0 0 16 16"><path fill="currentColor" d="M4.7 4.7 8 8l3.3-3.3 .9.9L8.9 8.9l3.3 3.3-.9.9L8 9.8l-3.3 3.3-.9-.9L7.1 8.9 3.8 5.6z"/></svg>수시 시즌 외 사용 불가</li>
+        </ul>
+      </article>
+
     </div>
 
-    <!-- Comparison table -->
-    <div class="table">
+    <!-- Full comparison -->
+    <details class="more">
+      <summary>전체 기능 비교</summary>
       <table>
         <thead>
           <tr>
-            <th class="feat-col">기능</th>
-            <th>
-              <span class="p-name">바이브온 플랜 <span class="tail">(구독형)</span></span>
-              <span class="p-strike">&nbsp;</span>
-              <span class="p-price blue">29,900원</span>
-            </th>
-            <th class="featured">
-              <span class="p-name">바이브온 패스 <span class="tail" style="color:#C7D9FB">(연간권)</span></span>
-              <span class="p-badge">↓ 30% 할인중</span>
-              <span class="p-strike">159,000원</span>
-              <span class="p-price">111,300원</span>
-            </th>
-            <th class="col-single" id="th-single">
-              <span class="p-name">단품</span>
-              <span class="p-badge accent" id="single-badge">오픈 특가</span>
-              <span class="p-strike">99,000원</span>
-              <span class="p-price blue">69,000원</span>
-            </th>
+            <th class="f">기능</th>
+            <th>바이브온 플랜</th>
+            <th>바이브온 패스</th>
+            <th class="col-single">단품</th>
           </tr>
         </thead>
         <tbody>
-          <tr class="hero">
-            <td class="feat-col">⭐ 수시ON</td>
-            <td data-col="구독형"><span class="no">✕</span></td>
-            <td class="featured-col" data-col="연간권"><span class="yes">✓</span></td>
-            <td class="col-single" data-col="단품"><span class="yes">✓</span></td>
-          </tr>
-          <tr>
-            <td class="feat-col">생기부ON</td>
-            <td data-col="구독형"><span class="yes">✓</span></td>
-            <td class="featured-col" data-col="연간권"><span class="yes">✓</span></td>
-            <td class="col-single" data-col="단품"><span class="no">✕</span></td>
-          </tr>
-          <tr>
-            <td class="feat-col">탐구ON</td>
-            <td data-col="구독형"><span class="yes">✓</span></td>
-            <td class="featured-col" data-col="연간권"><span class="yes">✓</span></td>
-            <td class="col-single" data-col="단품"><span class="no">✕</span></td>
-          </tr>
-          <tr>
-            <td class="feat-col">학종ON</td>
-            <td data-col="구독형"><span class="yes">✓</span></td>
-            <td class="featured-col" data-col="연간권"><span class="yes">✓</span></td>
-            <td class="col-single" data-col="단품"><span class="no">✕</span></td>
-          </tr>
-          <tr>
-            <td class="feat-col">교과ON</td>
-            <td data-col="구독형"><span class="yes">✓</span></td>
-            <td class="featured-col" data-col="연간권"><span class="yes">✓</span></td>
-            <td class="col-single" data-col="단품"><span class="no">✕</span></td>
-          </tr>
-          <tr>
-            <td class="feat-col">면접ON</td>
-            <td data-col="구독형"><span class="yes">✓</span></td>
-            <td class="featured-col" data-col="연간권"><span class="yes">✓</span></td>
-            <td class="col-single" data-col="단품"><span class="no">✕</span></td>
-          </tr>
-          <tr>
-            <td class="feat-col">판매 기간</td>
-            <td class="meta" data-col="구독형">상시</td>
-            <td class="featured-col meta" data-col="연간권">상시</td>
-            <td class="col-single meta" data-col="단품">26.07.23~26.09.13</td>
-          </tr>
-          <tr>
-            <td class="feat-col">이용 기간</td>
-            <td class="meta" data-col="구독형">수시ON: <span style="color:var(--no)">사용불가</span><br>나머지: 구매일~1달</td>
-            <td class="featured-col meta" data-col="연간권"><span class="hl">수시ON: 26.07.23~26.09.13</span><br>나머지: 구매일~1년</td>
-            <td class="col-single meta" data-col="단품"><span class="hl">수시ON: 26.07.23~26.09.13</span><br>나머지: 사용불가</td>
-          </tr>
+          <tr><td class="f">수시ON</td><td class="nope">–</td><td class="yes">✓</td><td class="col-single yes">✓</td></tr>
+          <tr><td class="f">생기부ON</td><td class="yes">✓</td><td class="yes">✓</td><td class="col-single nope">–</td></tr>
+          <tr><td class="f">탐구ON</td><td class="yes">✓</td><td class="yes">✓</td><td class="col-single nope">–</td></tr>
+          <tr><td class="f">학종ON</td><td class="yes">✓</td><td class="yes">✓</td><td class="col-single nope">–</td></tr>
+          <tr><td class="f">교과ON</td><td class="yes">✓</td><td class="yes">✓</td><td class="col-single nope">–</td></tr>
+          <tr><td class="f">면접ON</td><td class="yes">✓</td><td class="yes">✓</td><td class="col-single nope">–</td></tr>
+          <tr><td class="f">판매 기간</td><td>상시</td><td>상시</td><td class="col-single">26.07.23~26.09.13</td></tr>
+          <tr><td class="f">이용 기간</td><td>구매일~1달</td><td>구매일~1년</td><td class="col-single">수시 시즌 한정</td></tr>
         </tbody>
       </table>
-    </div>
+    </details>
 
-    <!-- CTAs -->
-    <div class="ctas">
-      <button class="cta primary">30% 할인가로 바이브온 패스(연간권) 구매</button>
-      <button class="cta ghost col-single" id="single-cta">단품 구매</button>
-    </div>
-    <div class="reassure"><span>↩︎ 14일 내 환불</span><span>🔒 안전 결제</span><span>💳 카드·간편결제</span></div>
-
-    <!-- Decision helper -->
-    <section class="chooser">
-      <h2>어떤 걸 골라야 할까요?</h2>
-      <div class="cards">
-        <div class="ccard">
-          <div class="q">수시 시즌만 빠르게 쓰고 싶어요</div>
-          <div class="a">수시ON 한 가지 기능만, 가장 저렴하게. 단, 7/23~9/13 한정 판매예요.</div>
-          <span class="pick accent col-single" id="pick-single">→ 단품 69,000원</span>
-          <span class="pick" id="pick-alt" style="display:none">→ 지금은 연간권으로 수시ON 이용</span>
-        </div>
-        <div class="ccard">
-          <div class="q">1년 내내 입시 전체를 관리하고 싶어요</div>
-          <div class="a">수시ON + 생기부·탐구·학종·교과·면접까지 전부. 지금 30% 할인 중.</div>
-          <span class="pick">→ 바이브온 패스(연간권)</span>
-        </div>
-        <div class="ccard">
-          <div class="q">수시ON은 필요 없고 월 단위로 유연하게</div>
-          <div class="a">생기부·탐구 등 핵심 기능을 매월 부담 없이. 언제든 해지 가능.</div>
-          <span class="pick">→ 바이브온 플랜(구독형)</span>
-        </div>
-      </div>
-    </section>
-
-    <p class="footnote">※ 안정적인 서비스 제공을 위해 수시ON 오픈일은 조정될 수 있습니다.</p>
+    <p class="fine">
+      ※ 수시ON은 단품 또는 바이브온 패스(연간권) 구매 시에만 사용할 수 있습니다.<br>
+      ※ 안정적인 서비스 제공을 위해 수시ON 오픈일은 조정될 수 있습니다. · 결제 후 14일 이내 미사용 시 환불 가능.
+    </p>
   </div>
 
   <script>
-    // Product is data-driven: the 단품(single) column is shown/hidden by phase,
-    // so reverting to 2 products on 9/14 needs no layout change — just phase flip.
+    // 단품 card is data-driven: hidden after 9/14 → cards auto-recenter to 2.
     const PHASES = {
       before: {
-        single: true, singleSaleable: false,
-        badge: '오픈 예정', badgeClass: 'coming',
-        cta: '단품 구매 (7/23 판매 예정)', ctaDisabled: true,
-        periodClass: 'calm',
-        periodHTML: '단품은 <b>7월 23일</b>부터 한정 판매됩니다. 지금은 <b>연간권 30% 할인</b>으로 미리 수시ON까지 준비하세요.'
+        single: true, btn: '7/23 판매 예정', btnDisabled: true, pill: '오픈 예정', pillMuted: true,
+        note: '7월 23일 오픈 예정',
+        notice: '단품은 <b>7월 23일</b>부터 한정 판매됩니다. 지금은 <b>연간권 30% 할인</b>으로 미리 준비하세요.'
       },
       sale: {
-        single: true, singleSaleable: true,
-        badge: '오픈 특가', badgeClass: '',
-        cta: '단품 구매', ctaDisabled: false,
-        periodClass: '',
-        periodHTML: '🔥 <b>단품 한정 판매중</b> · 7/23~9/13 · 수시ON만 필요하다면 지금이 기회예요. <b>9/14부터는 판매 종료</b>됩니다.'
+        single: true, btn: '단품 구매하기', btnDisabled: false, pill: '한정', pillMuted: false,
+        note: '7/23~9/13 한정 판매',
+        notice: '🔥 <b>단품 한정 판매중</b> · 7/23~9/13. <b>9/14부터 판매 종료</b>됩니다.'
       },
       after: {
-        single: false, singleSaleable: false,
-        periodClass: 'calm',
-        periodHTML: '단품 판매가 종료되었습니다. 수시ON은 <b>바이브온 패스(연간권)</b>로 이용하실 수 있어요.'
+        single: false,
+        notice: '단품 판매가 종료되었습니다. 수시ON은 <b>바이브온 패스(연간권)</b>로 이용할 수 있어요.'
       }
     };
-
     function applyPhase(name) {
       const p = PHASES[name];
-      // toggle 단품 column visibility everywhere
-      document.querySelectorAll('.col-single').forEach(el => el.classList.toggle('col-hide', !p.single));
-      // when single column hidden, table layout: feature + 2 plans
-      document.querySelectorAll('th.feat-col, td.feat-col').forEach(el => {
-        el.style.width = p.single ? '19%' : '24%';
-      });
-      // period banner
-      const period = document.getElementById('period');
-      period.className = 'period ' + (p.periodClass || '');
-      document.getElementById('period-text').innerHTML = p.periodHTML;
-      // single badge + cta
+      document.querySelectorAll('.col-single').forEach(el => el.classList.toggle('hide', !p.single));
+      document.getElementById('cards').classList.toggle('two', !p.single);
+      document.getElementById('notice-text').innerHTML = p.notice;
       if (p.single) {
-        const b = document.getElementById('single-badge');
-        b.textContent = p.badge; b.className = 'p-badge accent' + (p.badgeClass ? ' ' + p.badgeClass : '');
-        const c = document.getElementById('single-cta');
-        c.textContent = p.cta; c.disabled = p.ctaDisabled;
+        const pill = document.getElementById('single-pill');
+        pill.textContent = p.pill; pill.className = 'pill' + (p.pillMuted ? ' muted' : '');
+        document.getElementById('single-note').textContent = p.note;
+        const btn = document.getElementById('single-btn');
+        btn.textContent = p.btn; btn.disabled = p.btnDisabled;
       }
-      // chooser: 수시-only card points to 단품 while saleable, else to 연간권
-      document.getElementById('pick-alt').style.display = p.single ? 'none' : 'inline-block';
-      // demo buttons state
-      document.querySelectorAll('.demo-bar button').forEach(btn =>
-        btn.classList.toggle('on', btn.dataset.phase === name));
+      document.querySelectorAll('.demo-bar button').forEach(b => b.classList.toggle('on', b.dataset.phase === name));
     }
-
     document.querySelector('.demo-bar').addEventListener('click', e => {
-      const btn = e.target.closest('button'); if (!btn) return; applyPhase(btn.dataset.phase);
+      const b = e.target.closest('button'); if (b) applyPhase(b.dataset.phase);
     });
-
-    // Default to the current real-world phase. Today (demo) = before 7/23.
-    applyPhase('before');
+    applyPhase('before'); // today = before 7/23
   </script>
 </body>
 </html>
