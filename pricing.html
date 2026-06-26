@@ -100,10 +100,39 @@
 
   .fine { margin-top: 40px; text-align: center; font-size: 12px; color: var(--ink-3); line-height: 1.8; }
 
+  /* ---- marketing sections ---- */
+  .event { margin-top: 40px; border-radius: var(--radius); padding: 26px 30px; display: flex; align-items: center; justify-content: space-between; gap: 22px; background: linear-gradient(100deg,#2A1A4A,#5B2BD6); color: #fff; }
+  .event h3 { font-size: 20px; font-weight: 800; letter-spacing: -.5px; }
+  .event p { margin-top: 6px; font-size: 13.5px; color: #DBD0F7; }
+  .event .ebadge { flex-shrink: 0; display: flex; align-items: center; gap: 16px; }
+  .event .efree { font-size: 40px; font-weight: 900; color: #FFD23F; line-height: 1; }
+  .event .ebtn { border: none; background: #FFD23F; color: #2A1A4A; font-weight: 800; font-size: 14px; padding: 12px 20px; border-radius: 10px; cursor: pointer; white-space: nowrap; }
+
+  .sec { margin-top: 64px; }
+  .sec-h { text-align: center; }
+  .sec-h .ey { font-size: 13px; font-weight: 800; color: var(--purple); letter-spacing: .3px; }
+  .sec-h h2 { font-size: 27px; font-weight: 800; letter-spacing: -.7px; margin-top: 7px; }
+
+  .stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-top: 28px; }
+  .stat { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 24px 16px; text-align: center; }
+  .stat .big { font-size: 28px; font-weight: 800; letter-spacing: -.5px; }
+  .stat .lbl { font-size: 13px; color: var(--ink-3); margin-top: 7px; }
+
+  .reviews { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin-top: 28px; }
+  .rv { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; display: flex; flex-direction: column; }
+  .rv .stars { color: #FFB300; font-size: 14px; letter-spacing: 2px; }
+  .rv .q { margin-top: 11px; font-size: 13.5px; color: var(--ink-2); line-height: 1.7; flex: 1; }
+  .rv .who { margin-top: 16px; display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--ink-3); }
+  .rv .who .v { font-size: 11px; font-weight: 800; color: var(--green); background: #E6FAF1; padding: 2px 8px; border-radius: 999px; }
+
   @media (max-width: 880px) {
     .title { font-size: 32px; letter-spacing: -1px; }
     .cards, .cards.two { grid-template-columns: 1fr; max-width: 460px; margin-left: auto; margin-right: auto; }
     .pdesc { min-height: 0; }
+    .event { flex-direction: column; align-items: flex-start; }
+    .event .ebadge { width: 100%; justify-content: space-between; }
+    .stats { grid-template-columns: 1fr 1fr; }
+    .reviews { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -194,6 +223,18 @@
 
     </div>
 
+    <!-- Event banner -->
+    <section class="event">
+      <div class="etxt">
+        <h3>🎁 지금 연간권 구매하면, goover AI 이용권 3개월 무료</h3>
+        <p>보고서·리서치 전문 AI를 추가 비용 없이 — 이번 학기 탐구 활동까지 한 번에 끝내세요.</p>
+      </div>
+      <div class="ebadge">
+        <span class="efree">0원</span>
+        <button class="ebtn" onclick="alert('데모: 쿠폰 받기')">쿠폰 받기</button>
+      </div>
+    </section>
+
     <details class="more">
       <summary>모든 기능 비교</summary>
       <table>
@@ -212,6 +253,60 @@
         </tbody>
       </table>
     </details>
+
+    <!-- Promo + trust stats -->
+    <section class="sec">
+      <div class="sec-h">
+        <div class="ey">바이브온을 선택하는 이유</div>
+        <h2>입시정보 AI 학습량 업계 1위</h2>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="big" style="color:var(--purple)">93.5%</div><div class="lbl">학종 예측 정확도</div></div>
+        <div class="stat"><div class="big" style="color:var(--blue)">14.5만</div><div class="lbl">입결 데이터 학습</div></div>
+        <div class="stat"><div class="big" style="color:var(--green)">2,000만</div><div class="lbl">생기부 학습 문장</div></div>
+        <div class="stat"><div class="big" style="color:var(--orange)">227개</div><div class="lbl">선택한 고등학교</div></div>
+      </div>
+    </section>
+
+    <!-- Purchase reviews -->
+    <section class="sec">
+      <div class="sec-h">
+        <div class="ey">실제 구매 후기</div>
+        <h2>먼저 써본 분들의 이야기</h2>
+      </div>
+      <div class="reviews">
+        <div class="rv">
+          <div class="stars">★★★★★</div>
+          <p class="q">"생기부 주제를 어떻게 잡아야 할지 막막했는데, 탐구ON으로 방향을 잡았어요. 시간을 정말 많이 아꼈습니다."</p>
+          <div class="who">고2 학부모 김○○ <span class="v">구매 인증</span></div>
+        </div>
+        <div class="rv">
+          <div class="stars">★★★★★</div>
+          <p class="q">"수시ON으로 지원 대학 라인 잡는 게 훨씬 수월했어요. 연간권은 가성비가 진짜 최고네요."</p>
+          <div class="who">고3 박○○ <span class="v">구매 인증</span></div>
+        </div>
+        <div class="rv">
+          <div class="stars">★★★★☆</div>
+          <p class="q">"면접ON 모의 질문이 실제 면접이랑 비슷해서 연습하는 데 큰 도움이 됐습니다."</p>
+          <div class="who">N수생 이○○ <span class="v">구매 인증</span></div>
+        </div>
+        <div class="rv">
+          <div class="stars">★★★★★</div>
+          <p class="q">"단품으로 수시 시즌만 딱 썼는데, 필요한 만큼만 결제할 수 있어서 부담이 없었어요."</p>
+          <div class="who">고3 학부모 최○○ <span class="v">구매 인증</span></div>
+        </div>
+        <div class="rv">
+          <div class="stars">★★★★★</div>
+          <p class="q">"학종ON 데이터가 학교별로 잘 정리돼 있어서 상담할 때 바로 활용했습니다. 추천해요."</p>
+          <div class="who">담임교사 정○○ <span class="v">구매 인증</span></div>
+        </div>
+        <div class="rv">
+          <div class="stars">★★★★★</div>
+          <p class="q">"교과ON 내신 라인 분석이 정확해서 원서 전략 짜기가 한결 편했어요. 다음 시즌도 쓸 거예요."</p>
+          <div class="who">고3 윤○○ <span class="v">구매 인증</span></div>
+        </div>
+      </div>
+    </section>
 
     <p class="fine">
       ※ 수시ON은 단품 또는 바이브온 패스(연간권) 구매 시에만 사용할 수 있습니다.<br>
