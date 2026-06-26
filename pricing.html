@@ -100,6 +100,22 @@
 
   .fine { margin-top: 40px; text-align: center; font-size: 12px; color: var(--ink-3); line-height: 1.8; }
 
+  /* ---- top rating bar (instant social proof) ---- */
+  html { scroll-behavior: smooth; }
+  .ratingbar { margin: 18px auto 0; width: max-content; max-width: 100%; display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink-2); background: #fff; border: 1px solid var(--line); border-radius: 999px; padding: 8px 8px 8px 14px; font-size: 13px; transition: .15s; }
+  .ratingbar:hover { box-shadow: 0 4px 16px rgba(0,0,0,.08); transform: translateY(-1px); }
+  .ratingbar .avs { display: flex; }
+  .ratingbar .avs i { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #fff; margin-left: -9px; }
+  .ratingbar .avs i:first-child { margin-left: 0; }
+  .ratingbar .avs i:nth-child(1){ background: linear-gradient(135deg,var(--purple),var(--blue)); }
+  .ratingbar .avs i:nth-child(2){ background: linear-gradient(135deg,var(--orange),var(--red)); }
+  .ratingbar .avs i:nth-child(3){ background: linear-gradient(135deg,var(--green),var(--blue)); }
+  .ratingbar .avs i:nth-child(4){ background: linear-gradient(135deg,var(--blue),var(--purple)); }
+  .ratingbar .rstars { color: #FFB300; letter-spacing: 1px; }
+  .ratingbar strong { color: var(--ink); font-weight: 800; }
+  .ratingbar .rcount { color: var(--ink-3); }
+  .ratingbar .rgo { margin-left: 4px; color: var(--purple); font-weight: 800; background: var(--purple-soft); padding: 5px 11px; border-radius: 999px; }
+
   /* ---- marketing sections ---- */
   .event { margin-top: 40px; border-radius: var(--radius); padding: 26px 30px; display: flex; align-items: center; justify-content: space-between; gap: 22px; background: linear-gradient(100deg,#2A1A4A,#5B2BD6); color: #fff; }
   .event h3 { font-size: 20px; font-weight: 800; letter-spacing: -.5px; }
@@ -133,6 +149,7 @@
     .event .ebadge { width: 100%; justify-content: space-between; }
     .stats { grid-template-columns: 1fr 1fr; }
     .reviews { grid-template-columns: 1fr; }
+    .ratingbar { width: auto; flex-wrap: wrap; justify-content: center; }
   }
 </style>
 </head>
@@ -160,6 +177,14 @@
     </div>
 
     <div class="notice"><span class="dot"></span><span id="notice-text"></span></div>
+
+    <a class="ratingbar" href="#reviews">
+      <span class="avs"><i></i><i></i><i></i><i></i></span>
+      <span class="rstars">★★★★★</span>
+      <strong>4.9</strong>
+      <span class="rcount">구매자 2,847명의 후기</span>
+      <span class="rgo">후기 보기 ↓</span>
+    </a>
 
     <div class="cards" id="cards">
 
@@ -235,43 +260,10 @@
       </div>
     </section>
 
-    <details class="more">
-      <summary>모든 기능 비교</summary>
-      <table>
-        <thead>
-          <tr><th class="f">기능</th><th>바이브온 플랜</th><th>바이브온 패스</th><th class="col-single">단품</th></tr>
-        </thead>
-        <tbody>
-          <tr><td class="f">수시ON</td><td class="nope">–</td><td><b style="color:var(--purple)">✓</b></td><td class="col-single"><b style="color:var(--orange)">✓</b></td></tr>
-          <tr><td class="f">생기부ON</td><td><b style="color:var(--blue)">✓</b></td><td><b style="color:var(--purple)">✓</b></td><td class="col-single nope">–</td></tr>
-          <tr><td class="f">탐구ON</td><td><b style="color:var(--blue)">✓</b></td><td><b style="color:var(--purple)">✓</b></td><td class="col-single nope">–</td></tr>
-          <tr><td class="f">학종ON</td><td><b style="color:var(--blue)">✓</b></td><td><b style="color:var(--purple)">✓</b></td><td class="col-single nope">–</td></tr>
-          <tr><td class="f">교과ON</td><td><b style="color:var(--blue)">✓</b></td><td><b style="color:var(--purple)">✓</b></td><td class="col-single nope">–</td></tr>
-          <tr><td class="f">면접ON</td><td><b style="color:var(--blue)">✓</b></td><td><b style="color:var(--purple)">✓</b></td><td class="col-single nope">–</td></tr>
-          <tr><td class="f">판매 기간</td><td>상시</td><td>상시</td><td class="col-single">26.07.23~26.09.13</td></tr>
-          <tr><td class="f">이용 기간</td><td>구매일~1달</td><td>구매일~1년</td><td class="col-single">수시 시즌 한정</td></tr>
-        </tbody>
-      </table>
-    </details>
-
-    <!-- Promo + trust stats -->
-    <section class="sec">
+    <!-- Purchase reviews (moved up: right after the offer) -->
+    <section class="sec" id="reviews">
       <div class="sec-h">
-        <div class="ey">바이브온을 선택하는 이유</div>
-        <h2>입시정보 AI 학습량 업계 1위</h2>
-      </div>
-      <div class="stats">
-        <div class="stat"><div class="big" style="color:var(--purple)">93.5%</div><div class="lbl">학종 예측 정확도</div></div>
-        <div class="stat"><div class="big" style="color:var(--blue)">14.5만</div><div class="lbl">입결 데이터 학습</div></div>
-        <div class="stat"><div class="big" style="color:var(--green)">2,000만</div><div class="lbl">생기부 학습 문장</div></div>
-        <div class="stat"><div class="big" style="color:var(--orange)">227개</div><div class="lbl">선택한 고등학교</div></div>
-      </div>
-    </section>
-
-    <!-- Purchase reviews -->
-    <section class="sec">
-      <div class="sec-h">
-        <div class="ey">실제 구매 후기</div>
+        <div class="ey">실제 구매 후기 · ★4.9 (2,847개)</div>
         <h2>먼저 써본 분들의 이야기</h2>
       </div>
       <div class="reviews">
@@ -307,6 +299,39 @@
         </div>
       </div>
     </section>
+
+    <!-- Promo + trust stats -->
+    <section class="sec">
+      <div class="sec-h">
+        <div class="ey">바이브온을 선택하는 이유</div>
+        <h2>입시정보 AI 학습량 업계 1위</h2>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="big" style="color:var(--purple)">93.5%</div><div class="lbl">학종 예측 정확도</div></div>
+        <div class="stat"><div class="big" style="color:var(--blue)">14.5만</div><div class="lbl">입결 데이터 학습</div></div>
+        <div class="stat"><div class="big" style="color:var(--green)">2,000만</div><div class="lbl">생기부 학습 문장</div></div>
+        <div class="stat"><div class="big" style="color:var(--orange)">227개</div><div class="lbl">선택한 고등학교</div></div>
+      </div>
+    </section>
+
+    <details class="more">
+      <summary>모든 기능 비교</summary>
+      <table>
+        <thead>
+          <tr><th class="f">기능</th><th>바이브온 플랜</th><th>바이브온 패스</th><th class="col-single">단품</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="f">수시ON</td><td class="nope">–</td><td><b style="color:var(--purple)">✓</b></td><td class="col-single"><b style="color:var(--orange)">✓</b></td></tr>
+          <tr><td class="f">생기부ON</td><td><b style="color:var(--blue)">✓</b></td><td><b style="color:var(--purple)">✓</b></td><td class="col-single nope">–</td></tr>
+          <tr><td class="f">탐구ON</td><td><b style="color:var(--blue)">✓</b></td><td><b style="color:var(--purple)">✓</b></td><td class="col-single nope">–</td></tr>
+          <tr><td class="f">학종ON</td><td><b style="color:var(--blue)">✓</b></td><td><b style="color:var(--purple)">✓</b></td><td class="col-single nope">–</td></tr>
+          <tr><td class="f">교과ON</td><td><b style="color:var(--blue)">✓</b></td><td><b style="color:var(--purple)">✓</b></td><td class="col-single nope">–</td></tr>
+          <tr><td class="f">면접ON</td><td><b style="color:var(--blue)">✓</b></td><td><b style="color:var(--purple)">✓</b></td><td class="col-single nope">–</td></tr>
+          <tr><td class="f">판매 기간</td><td>상시</td><td>상시</td><td class="col-single">26.07.23~26.09.13</td></tr>
+          <tr><td class="f">이용 기간</td><td>구매일~1달</td><td>구매일~1년</td><td class="col-single">수시 시즌 한정</td></tr>
+        </tbody>
+      </table>
+    </details>
 
     <p class="fine">
       ※ 수시ON은 단품 또는 바이브온 패스(연간권) 구매 시에만 사용할 수 있습니다.<br>
