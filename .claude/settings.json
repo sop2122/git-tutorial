@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__Atlassian_Rovo__searchJiraIssuesUsingJql",
+      "mcp__Atlassian_Rovo__getJiraIssue",
+      "mcp__Atlassian_Rovo__getVisibleJiraProjects",
+      "mcp__Atlassian_Rovo__getAccessibleAtlassianResources"
+    ]
+  }
+}
