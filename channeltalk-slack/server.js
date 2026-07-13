@@ -36,18 +36,6 @@ app.post(
     res.sendStatus(200);
 
     try {
-      // 임시 진단용 — 버튼 클릭 vs 실제 메시지 구분 확인 후 제거
-      const _e = req.body?.entity ?? {};
-      const _uc = req.body?.refers?.userChat ?? {};
-      console.log('[diag]', JSON.stringify({
-        personType: _e.personType,
-        text: (_e.plainText ?? '').slice(0, 25),
-        workflowButton: _e.workflowButton,
-        options: _e.options,
-        state: _uc.state,
-        managed: _uc.managed,
-        handling: _uc.handling?.type,
-      }));
       const msg = parseWebhook(req.body);
       if (!msg.isUserMessage || !msg.text || !msg.userChatId) return; // 고객 발화만 처리
 

@@ -42,8 +42,19 @@ export function verifyWebhookSignature(rawBody, signatureHeader) {
 export function parseWebhook(payload) {
   const entity = payload?.entity ?? {};
   const refers = payload?.refers ?? {};
+  const options = entity.options ?? [];
+
+  // 고객이 '직접 타이핑한' 메시지만 처리.
+  //  - personType === 'user'      : 매니저/봇 메시지 제외
+  //  - workflowButton !== true    : 워크플로우 버튼 클릭(예: "상담원에게 직접 문의하기") 제외
+  //  - options 에 'doNotPost' 없음 : 봇·폼·자동 메시지(채널톡이 알림 대상 아님으로 표시) 제외
+  const isRealUserMessage =
+    entity.personType === 'user' &&
+    entity.workflowButton !== true &&
+    !options.includes('doNotPost');
+
   return {
-    isUserMessage: entity.personType === 'user',
+    isUserMessage: isRealUserMessage,
     userChatId: entity.chatId ?? refers.userChat?.id,
     text: entity.plainText ?? '',
     customerName: refers.user?.name ?? refers.user?.profile?.name ?? '고객',
