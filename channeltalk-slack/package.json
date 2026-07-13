@@ -1,0 +1,18 @@
+{
+  "name": "channeltalk-slack-relay",
+  "version": "0.1.0",
+  "description": "채널톡 메시지를 Slack으로 전달하고 Claude로 답변 초안을 자동 생성하는 중계 서버",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "check": "node --check server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
