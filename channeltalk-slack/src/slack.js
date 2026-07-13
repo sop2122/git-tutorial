@@ -21,16 +21,25 @@ async function slackApi(method, body) {
 }
 
 /**
- * 고객 문의 + 초안을 Slack 채널에 게시.
+ * 고객 문의 + 구조화된 초안을 Slack 채널에 게시.
+ * `result` 는 claude.generateDraft 의 반환 객체(category, is_escalation, draft, agent_note, ...).
  * 버튼의 value 에 userChatId 를 실어 나중에 어느 상담에 답장할지 식별한다.
  */
-export function buildBlocks({ customerName, customerMessage, draft, userChatId }) {
+export function buildBlocks({ customerName, customerMessage, userChatId, result }) {
+  const { category, is_escalation, branch_id, draft, agent_note, missing_info } = result;
   const payload = JSON.stringify({ userChatId, draft });
-  return [
+
+  // 태그 + 이관 배지
+  const badges = [`\`${category ?? '기타'}\``];
+  if (branch_id) badges.push(`\`${branch_id}\``);
+  if (is_escalation) badges.push('🚨 *D형 즉시이관*');
+
+  const blocks = [
     {
       type: 'header',
       text: { type: 'plain_text', text: `📨 ${customerName} 님의 새 문의`, emoji: true },
     },
+    { type: 'context', elements: [{ type: 'mrkdwn', text: badges.join('  ·  ') }] },
     {
       type: 'section',
       text: { type: 'mrkdwn', text: `*고객 문의*\n>${customerMessage.replace(/\n/g, '\n>')}` },
@@ -40,12 +49,28 @@ export function buildBlocks({ customerName, customerMessage, draft, userChatId }
       type: 'section',
       text: { type: 'mrkdwn', text: `*🤖 추천 답변 초안*\n${draft}` },
     },
+  ];
+
+  // 상담원 참고(내부 메모) — 있을 때만
+  const noteLines = [];
+  if (agent_note) noteLines.push(agent_note);
+  if (missing_info && missing_info.length) {
+    noteLines.push('*확인 필요:* ' + missing_info.map((m) => `\n• ${m}`).join(''));
+  }
+  if (noteLines.length) {
+    blocks.push({
+      type: 'section',
+      text: { type: 'mrkdwn', text: `*🔎 상담원 참고*\n${noteLines.join('\n')}` },
+    });
+  }
+
+  blocks.push(
     {
       type: 'actions',
       elements: [
         {
           type: 'button',
-          style: 'primary',
+          style: is_escalation ? undefined : 'primary',
           text: { type: 'plain_text', text: '✅ 이대로 보내기', emoji: true },
           action_id: 'send_draft',
           value: payload,
@@ -61,10 +86,17 @@ export function buildBlocks({ customerName, customerMessage, draft, userChatId }
     {
       type: 'context',
       elements: [
-        { type: 'mrkdwn', text: '초안을 수정해 보내려면 채널톡에서 직접 답장하세요. (버튼은 초안 원문 그대로 발송)' },
+        {
+          type: 'mrkdwn',
+          text: is_escalation
+            ? '⚠️ D형 이관 건입니다. 초안은 표준 이관 안내 문구예요 — 실제 처리는 담당 부서로 넘기세요.'
+            : '초안을 수정해 보내려면 채널톡에서 직접 답장하세요. (버튼은 초안 원문 그대로 발송)',
+        },
       ],
     },
-  ];
+  );
+
+  return blocks;
 }
 
 export async function postInquiry(args) {

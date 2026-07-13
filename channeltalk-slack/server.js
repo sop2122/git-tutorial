@@ -44,13 +44,13 @@ app.post(
         return [];
       });
 
-      const draft = await generateDraft({ customerMessage: msg.text, history });
+      const result = await generateDraft({ customerMessage: msg.text, history });
 
       await postInquiry({
         customerName: msg.customerName,
         customerMessage: msg.text,
-        draft,
         userChatId: msg.userChatId,
+        result,
       });
       console.log(`[ok] 문의 게시 완료 (userChat=${msg.userChatId})`);
     } catch (e) {

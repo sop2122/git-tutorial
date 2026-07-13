@@ -1,6 +1,12 @@
 // Claude API 를 호출해 고객 문의에 대한 답변 '초안'을 생성한다.
-// 입력: 이번 문의 텍스트 + 이전 대화 히스토리 + FAQ
-// 출력: 상담원이 검토/수정할 답변 초안 (그대로 보내도 될 수준을 목표로)
+// 바이브온 CS 체계(D형 즉시이관 → 매크로 → 정책 1차판정 → 내부조회) 를 반영해,
+// 단순 답변이 아니라 아래 구조로 생성한다:
+//   - category      : 태그 10종 중 하나
+//   - is_escalation : D형 즉시이관 여부
+//   - branch_id     : 해당 SSOT 분기ID(R-02 등), 없으면 ""
+//   - draft         : 고객에게 보낼 답변 초안(존댓말)
+//   - agent_note    : 상담원 참고(어느 분기/무엇을 확인/이관 필요)
+//   - missing_info  : 초안 확정에 더 필요한 정보 목록
 
 import { config } from './config.js';
 import { loadFaq } from './faq.js';
@@ -11,24 +17,61 @@ function buildHistoryBlock(history) {
   return history.map((m) => `${label[m.who] ?? m.who}: ${m.text}`).join('\n');
 }
 
-const SYSTEM_PROMPT = `당신은 고객센터 상담원을 돕는 어시스턴트입니다.
-아래 FAQ와 이전 대화 히스토리를 바탕으로, 고객의 마지막 문의에 대한 답변 '초안'을 작성하세요.
+const SYSTEM_PROMPT = `당신은 바이브온(생기부 기반 입시 분석 서비스)의 CS 상담원을 돕는 어시스턴트입니다.
+아래 [지식 베이스]와 이전 대화, 고객의 마지막 문의를 근거로 상담원이 검토·발송할 답변 '초안'과 참고 정보를 만듭니다.
 
-규칙:
-- 한국어 존댓말로 작성합니다.
-- 고객의 불편에 먼저 공감한 뒤 핵심 답변을 전달합니다.
-- FAQ에 근거가 있는 내용만 사실로 단정합니다. 근거가 없으면 "확인 후 안내드리겠습니다"로 처리합니다.
-- 개인정보를 요구하거나 추측성 정보를 지어내지 않습니다.
-- 상담원이 그대로 보내거나 살짝만 수정하면 되도록, 답변 본문만 출력합니다. (머리말/설명 없이)`;
+이 서비스는 같은 유형의 문의(예: 환불)라도 맥락(상품유형·경과일·사용여부·회원유형 등)에 따라 답이 달라집니다. 단순 문의가 아니면 맥락 파악이 가장 중요합니다.
 
+## 판단 순서 (반드시 이 순서로)
+1. **D형(즉시이관) 신호가 있는가?** — 법령·기관/언론·개인정보 권리·보상/복구 재량 요구·환불원칙 불복·지표/알고리즘 설명 요구(승인된 표준답변 범위 외)·민원성. 하나라도 있으면 is_escalation=true, draft 는 D형 표준 한 문장만 쓰고 그 이상 답하지 않는다.
+2. **매크로에 있는 단순 질문인가?** — 지식 베이스의 승인된 매크로 문구를 근거로 초안 작성.
+3. **정책 기준 1차 판정이 가능한가?** — 환불/구독/이용권 판단 트리에서 해당 분기를 찾아 branch_id 로 기록. 판정에 필요한 입력값(경과일·사용여부·상품유형 등)이 문의에 없으면, 단정하지 말고 조건별로 안내하거나 확인 질문을 하고, 필요한 값을 missing_info 에 적는다.
+4. **내부 조회·조치가 필요한가?** — 표준 중간 안내 문구로 초안을 쓰고, agent_note 에 어떤 에스컬레이션 카드/무엇을 확인해야 하는지 적는다.
+
+## 작성 규칙
+- 한국어 존댓말. 초안 시작은 보통 "고객님, 안녕하세요." 로.
+- **회신 기한을 임의로 약속하지 않는다.** 표준 문구의 기한(영업일 1일/2일 등)만 사용. "오늘 중", "빠르게" 금지.
+- 지식 베이스에 근거가 없으면 사실을 지어내지 말고 "확인 후 안내드리겠습니다"로 처리.
+- 화면 경로는 지식 베이스 표기 그대로: 예) [MY페이지 > 구독관리], [구매내역].
+- 판단 트리에서 '단정 금지/기획자 재량'으로 표시된 건(R-08/09, T-30~32/60 등)은 가능/불가를 단정하지 말고 "확인 후 안내"로 쓰고 is_escalation=true.
+- draft 는 고객에게 그대로(또는 살짝만 수정) 보낼 수 있는 본문만. 머리말/설명 없이.
+- agent_note 는 상담원용 내부 메모(고객에게 안 보임): 적용 분기, 확인할 점, 이관 필요 여부를 1~3문장으로.`;
+
+const OUTPUT_SCHEMA = {
+  type: 'object',
+  additionalProperties: false,
+  properties: {
+    category: {
+      type: 'string',
+      enum: ['이용권', '환불·결제', '이벤트', '사용성', '오류', '계정', '지표문의', '서비스범위', 'B2B', '기타'],
+    },
+    is_escalation: { type: 'boolean' },
+    branch_id: { type: 'string' },
+    draft: { type: 'string' },
+    agent_note: { type: 'string' },
+    missing_info: { type: 'array', items: { type: 'string' } },
+  },
+  required: ['category', 'is_escalation', 'branch_id', 'draft', 'agent_note', 'missing_info'],
+};
+
+/**
+ * @returns {Promise<{category,is_escalation,branch_id,draft,agent_note,missing_info}>}
+ */
 export async function generateDraft({ customerMessage, history }) {
   if (!config.claude.apiKey) {
-    return '(초안 생성 불가: ANTHROPIC_API_KEY 미설정)';
+    return {
+      category: '기타',
+      is_escalation: false,
+      branch_id: '',
+      draft: '(초안 생성 불가: ANTHROPIC_API_KEY 미설정)',
+      agent_note: '',
+      missing_info: [],
+    };
   }
 
   const faq = await loadFaq();
-  const userContent = `# FAQ / 정책
-${faq || '(FAQ 없음)'}
+  const userContent = `# 지식 베이스
+${faq || '(지식 베이스 없음)'}
 
 # 이전 대화 히스토리
 ${buildHistoryBlock(history)}
@@ -36,7 +79,7 @@ ${buildHistoryBlock(history)}
 # 고객의 마지막 문의
 ${customerMessage}
 
-위 문의에 대한 답변 초안을 작성해 주세요.`;
+위 문의에 대해 판단 순서에 따라 초안과 참고 정보를 작성해 주세요.`;
 
   const res = await fetch(`${config.claude.baseUrl}/v1/messages`, {
     method: 'POST',
@@ -47,8 +90,9 @@ ${customerMessage}
     },
     body: JSON.stringify({
       model: config.claude.model,
-      max_tokens: 1024,
+      max_tokens: 1500,
       system: SYSTEM_PROMPT,
+      output_config: { format: { type: 'json_schema', schema: OUTPUT_SCHEMA } },
       messages: [{ role: 'user', content: userContent }],
     }),
   });
@@ -57,5 +101,19 @@ ${customerMessage}
     throw new Error(`Claude 초안 생성 실패: ${res.status} ${await res.text()}`);
   }
   const data = await res.json();
-  return data.content?.map((b) => b.text).join('').trim() || '(빈 응답)';
+  const text = data.content?.map((b) => b.text).join('').trim() || '';
+
+  try {
+    return JSON.parse(text);
+  } catch {
+    // 구조화 파싱 실패 시 본문만이라도 초안으로 반환
+    return {
+      category: '기타',
+      is_escalation: false,
+      branch_id: '',
+      draft: text || '(빈 응답)',
+      agent_note: '(구조화 응답 파싱 실패 — 원문 그대로 표시)',
+      missing_info: [],
+    };
+  }
 }
