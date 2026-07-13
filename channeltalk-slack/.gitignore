@@ -1,3 +1,6 @@
 node_modules/
 .env
 *.log
+
+# 실제 CS 지식 베이스는 내부 내용이므로 저장소에 올리지 않음 (data/faq.example.md 템플릿만 공유)
+data/faq.md

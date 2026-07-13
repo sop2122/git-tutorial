@@ -43,7 +43,8 @@ channeltalk-slack/
 ```bash
 cd channeltalk-slack
 npm install
-cp .env.example .env   # 값 채우기
+cp .env.example .env        # 값 채우기
+cp data/faq.example.md data/faq.md   # 실제 CS 지식 베이스로 채우기 (저장소에 안 올라감)
 ```
 
 ### 2. 환경 변수 (`.env`)
