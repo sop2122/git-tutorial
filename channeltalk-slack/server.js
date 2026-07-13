@@ -36,6 +36,7 @@ app.post(
     res.sendStatus(200);
 
     try {
+      console.log('[payload]', req.rawBody); // 임시 진단용 — 버튼 클릭 vs 실제 메시지 구분 확인 후 제거
       const msg = parseWebhook(req.body);
       if (!msg.isUserMessage || !msg.text || !msg.userChatId) return; // 고객 발화만 처리
 
