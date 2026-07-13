@@ -25,8 +25,8 @@ const SYSTEM_PROMPT = `당신은 바이브온(생기부 기반 입시 분석 서
 ## 판단 순서 (반드시 이 순서로)
 1. **D형(즉시이관) 신호가 있는가?** — 법령·기관/언론·개인정보 권리·보상/복구 재량 요구·환불원칙 불복·지표/알고리즘 설명 요구(승인된 표준답변 범위 외)·민원성. 하나라도 있으면 is_escalation=true, draft 는 D형 표준 한 문장만 쓰고 그 이상 답하지 않는다.
 2. **매크로에 있는 단순 질문인가?** — 지식 베이스의 승인된 매크로 문구를 근거로 초안 작성.
-3. **정책 기준 1차 판정이 가능한가?** — 환불/구독/이용권 판단 트리에서 해당 분기를 찾아 branch_id 로 기록. 판정에 필요한 입력값(경과일·사용여부·상품유형 등)이 문의에 없으면, 단정하지 말고 조건별로 안내하거나 확인 질문을 하고, 필요한 값을 missing_info 에 적는다.
-4. **내부 조회·조치가 필요한가?** — 표준 중간 안내 문구로 초안을 쓰고, agent_note 에 어떤 에스컬레이션 카드/무엇을 확인해야 하는지 적는다.
+3. **정책 기준 1차 판정이 가능한가?** — 환불/구독/이용권 판단 트리에서 해당 분기를 찾아 branch_id 로 기록. 판정에 필요한 입력값(경과일·사용여부·상품유형 등)이 문의에 없으면, 단정하지 말고 초안 안에서 조건별로 안내하거나 고객에게 필요한 정보를 되묻는다.
+4. **내부 조회·조치가 필요한가?** — 표준 중간 안내 문구로 초안을 쓴다.
 
 ## 작성 규칙
 - 한국어 존댓말. 초안 시작은 보통 "고객님, 안녕하세요." 로.
@@ -34,8 +34,7 @@ const SYSTEM_PROMPT = `당신은 바이브온(생기부 기반 입시 분석 서
 - 지식 베이스에 근거가 없으면 사실을 지어내지 말고 "확인 후 안내드리겠습니다"로 처리.
 - 화면 경로는 지식 베이스 표기 그대로: 예) [MY페이지 > 구독관리], [구매내역].
 - 판단 트리에서 '단정 금지/기획자 재량'으로 표시된 건(R-08/09, T-30~32/60 등)은 가능/불가를 단정하지 말고 "확인 후 안내"로 쓰고 is_escalation=true.
-- draft 는 고객에게 그대로(또는 살짝만 수정) 보낼 수 있는 본문만. 머리말/설명 없이.
-- agent_note 는 상담원용 내부 메모(고객에게 안 보임): 적용 분기, 확인할 점, 이관 필요 여부를 1~3문장으로.`;
+- draft 는 고객에게 그대로(또는 살짝만 수정) 보낼 수 있는 본문만. 머리말/설명 없이.`;
 
 const OUTPUT_SCHEMA = {
   type: 'object',
@@ -48,10 +47,8 @@ const OUTPUT_SCHEMA = {
     is_escalation: { type: 'boolean' },
     branch_id: { type: 'string' },
     draft: { type: 'string' },
-    agent_note: { type: 'string' },
-    missing_info: { type: 'array', items: { type: 'string' } },
   },
-  required: ['category', 'is_escalation', 'branch_id', 'draft', 'agent_note', 'missing_info'],
+  required: ['category', 'is_escalation', 'branch_id', 'draft'],
 };
 
 /**
@@ -64,8 +61,6 @@ export async function generateDraft({ customerMessage, history }) {
       is_escalation: false,
       branch_id: '',
       draft: '(초안 생성 불가: ANTHROPIC_API_KEY 미설정)',
-      agent_note: '',
-      missing_info: [],
     };
   }
 
@@ -112,8 +107,6 @@ ${customerMessage}
       is_escalation: false,
       branch_id: '',
       draft: text || '(빈 응답)',
-      agent_note: '(구조화 응답 파싱 실패 — 원문 그대로 표시)',
-      missing_info: [],
     };
   }
 }

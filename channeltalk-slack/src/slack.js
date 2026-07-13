@@ -26,7 +26,7 @@ async function slackApi(method, body) {
  * 버튼의 value 에 userChatId 를 실어 나중에 어느 상담에 답장할지 식별한다.
  */
 export function buildBlocks({ customerName, customerMessage, userChatId, result, isReply }) {
-  const { category, is_escalation, branch_id, draft, agent_note, missing_info } = result;
+  const { category, is_escalation, branch_id, draft } = result;
   const payload = JSON.stringify({ userChatId, draft });
 
   // 태그 + 이관 배지
@@ -54,19 +54,6 @@ export function buildBlocks({ customerName, customerMessage, userChatId, result,
       text: { type: 'mrkdwn', text: `*🤖 추천 답변 초안*\n${draft}` },
     },
   ];
-
-  // 상담원 참고(내부 메모) — 있을 때만
-  const noteLines = [];
-  if (agent_note) noteLines.push(agent_note);
-  if (missing_info && missing_info.length) {
-    noteLines.push('*확인 필요:* ' + missing_info.map((m) => `\n• ${m}`).join(''));
-  }
-  if (noteLines.length) {
-    blocks.push({
-      type: 'section',
-      text: { type: 'mrkdwn', text: `*🔎 상담원 참고*\n${noteLines.join('\n')}` },
-    });
-  }
 
   blocks.push(
     {
