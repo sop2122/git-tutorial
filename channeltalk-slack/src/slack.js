@@ -25,7 +25,7 @@ async function slackApi(method, body) {
  * `result` 는 claude.generateDraft 의 반환 객체(category, is_escalation, draft, agent_note, ...).
  * 버튼의 value 에 userChatId 를 실어 나중에 어느 상담에 답장할지 식별한다.
  */
-export function buildBlocks({ customerName, customerMessage, userChatId, result }) {
+export function buildBlocks({ customerName, customerMessage, userChatId, result, isReply }) {
   const { category, is_escalation, branch_id, draft, agent_note, missing_info } = result;
   const payload = JSON.stringify({ userChatId, draft });
 
@@ -37,7 +37,11 @@ export function buildBlocks({ customerName, customerMessage, userChatId, result 
   const blocks = [
     {
       type: 'header',
-      text: { type: 'plain_text', text: `📨 ${customerName} 님의 새 문의`, emoji: true },
+      text: {
+        type: 'plain_text',
+        text: isReply ? `💬 ${customerName} 님의 추가 메시지` : `📨 ${customerName} 님의 새 문의`,
+        emoji: true,
+      },
     },
     { type: 'context', elements: [{ type: 'mrkdwn', text: badges.join('  ·  ') }] },
     {
@@ -100,11 +104,13 @@ export function buildBlocks({ customerName, customerMessage, userChatId, result 
 }
 
 export async function postInquiry(args) {
-  return slackApi('chat.postMessage', {
+  const body = {
     channel: config.slack.channelId,
-    text: `${args.customerName} 님의 새 문의`, // 알림 fallback
-    blocks: buildBlocks(args),
-  });
+    text: `${args.customerName} 님의 ${args.threadTs ? '추가 메시지' : '새 문의'}`, // 알림 fallback
+    blocks: buildBlocks({ ...args, isReply: !!args.threadTs }),
+  };
+  if (args.threadTs) body.thread_ts = args.threadTs; // 같은 상담이면 스레드(댓글)로 추가
+  return slackApi('chat.postMessage', body);
 }
 
 /** 버튼 처리 후 원본 메시지를 결과 텍스트로 교체 */

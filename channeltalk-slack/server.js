@@ -22,6 +22,11 @@ import { postInquiry, updateMessage, verifySlackSignature } from './src/slack.js
 
 const app = express();
 
+// 같은 상담(userChat)의 메시지는 Slack 스레드로 묶는다: userChatId -> { ts(부모 메시지), lastAt }
+// 서버 재시작 시 초기화됨(그 이후 첫 메시지는 새 스레드로 시작). 마지막 활동 후 TTL 지나면 새 스레드.
+const threadByChat = new Map();
+const THREAD_TTL_MS = 12 * 60 * 60 * 1000; // 12시간
+
 // ── 채널톡 Webhook ──────────────────────────────────────
 // 서명 검증을 위해 raw body 가 필요하므로 express.json 의 verify 훅으로 원본을 보관.
 app.post(
@@ -46,13 +51,22 @@ app.post(
 
       const result = await generateDraft({ customerMessage: msg.text, history });
 
-      await postInquiry({
+      // 같은 상담이면 기존 Slack 메시지의 스레드로 추가
+      const now = Date.now();
+      const existing = threadByChat.get(msg.userChatId);
+      const threadTs = existing && now - existing.lastAt < THREAD_TTL_MS ? existing.ts : undefined;
+
+      const resp = await postInquiry({
         customerName: msg.customerName,
         customerMessage: msg.text,
         userChatId: msg.userChatId,
         result,
+        threadTs,
       });
-      console.log(`[ok] 문의 게시 완료 (userChat=${msg.userChatId})`);
+
+      // 부모 메시지 ts 저장(스레드 답글이면 기존 부모 유지, 아니면 이번 메시지가 부모)
+      threadByChat.set(msg.userChatId, { ts: threadTs ?? resp.ts, lastAt: now });
+      console.log(`[ok] 문의 게시 완료 (userChat=${msg.userChatId}, ${threadTs ? '스레드 추가' : '새 스레드'})`);
     } catch (e) {
       console.error('[webhook] 처리 실패:', e.message);
     }
