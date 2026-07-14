@@ -26,13 +26,12 @@ async function slackApi(method, body) {
  * 버튼의 value 에 userChatId 를 실어 나중에 어느 상담에 답장할지 식별한다.
  */
 export function buildBlocks({ customerName, customerMessage, userChatId, result, isReply }) {
-  const { category, is_escalation, branch_id, draft } = result;
+  const { category, is_escalation, draft } = result;
   const payload = JSON.stringify({ userChatId, draft });
 
-  // 태그 + 이관 배지
+  // 태그 + 에스컬레이션 배지
   const badges = [`\`${category ?? '기타'}\``];
-  if (branch_id) badges.push(`\`${branch_id}\``);
-  if (is_escalation) badges.push('🚨 *D형 즉시이관*');
+  if (is_escalation) badges.push('🚨 *확인 후 안내(에스컬레이션)*');
 
   const blocks = [
     {
@@ -80,7 +79,7 @@ export function buildBlocks({ customerName, customerMessage, userChatId, result,
         {
           type: 'mrkdwn',
           text: is_escalation
-            ? '⚠️ D형 이관 건입니다. 초안은 표준 이관 안내 문구예요 — 실제 처리는 담당 부서로 넘기세요.'
+            ? '⚠️ 확인 후 안내 대상입니다. 초안은 표준 안내 문구이니, 실제 확인·처리는 담당 부서로 넘기세요.'
             : '초안을 수정해 보내려면 채널톡에서 직접 답장하세요. (버튼은 초안 원문 그대로 발송)',
         },
       ],
