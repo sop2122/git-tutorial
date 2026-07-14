@@ -13,6 +13,38 @@ function buildHistoryBlock(history) {
   return history.map((m) => `${label[m.who] ?? m.who}: ${m.text}`).join('\n');
 }
 
+// 모델 출력에서 구조화 결과를 견고하게 추출한다.
+// 코드펜스(```json), 앞뒤 설명 텍스트가 섞여도 JSON 객체만 뽑아 파싱한다.
+// 실패하면 null 을 반환(원본 JSON 을 그대로 노출하지 않기 위함).
+function extractStructured(text) {
+  if (!text) return null;
+  let t = text.trim();
+  const fence = t.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  if (fence) t = fence[1].trim();
+
+  const tryParse = (s) => {
+    try {
+      return JSON.parse(s);
+    } catch {
+      return null;
+    }
+  };
+
+  let obj = tryParse(t);
+  if (!obj) {
+    const a = t.indexOf('{');
+    const b = t.lastIndexOf('}');
+    if (a !== -1 && b > a) obj = tryParse(t.slice(a, b + 1));
+  }
+  if (!obj || typeof obj.draft !== 'string') return null;
+
+  return {
+    category: typeof obj.category === 'string' ? obj.category : '기타',
+    is_escalation: obj.is_escalation === true,
+    draft: obj.draft,
+  };
+}
+
 const SYSTEM_PROMPT = `당신은 바이브온(입시 AI 분석 서비스: 생기부ON·학종ON·교과ON·탐구ON·면접ON)의 CS 상담원을 돕는 어시스턴트입니다.
 아래 [지식 베이스]와 이전 대화, 고객의 마지막 문의를 근거로 상담원이 검토·발송할 답변 '초안'을 만듭니다.
 같은 유형(예: 환불)이라도 맥락(상품유형·경과일·사용여부·회원유형 등)에 따라 답이 달라지므로, 단순 문의가 아니면 맥락 파악이 가장 중요합니다.
@@ -87,7 +119,7 @@ ${customerMessage}
     },
     body: JSON.stringify({
       model: config.claude.model,
-      max_tokens: 1500,
+      max_tokens: 2000,
       system: SYSTEM_PROMPT,
       output_config: { format: { type: 'json_schema', schema: OUTPUT_SCHEMA } },
       messages: [{ role: 'user', content: userContent }],
@@ -98,16 +130,16 @@ ${customerMessage}
     throw new Error(`Claude 초안 생성 실패: ${res.status} ${await res.text()}`);
   }
   const data = await res.json();
-  const text = data.content?.map((b) => b.text).join('').trim() || '';
+  const text = data.content?.map((b) => b.text ?? '').join('').trim() || '';
 
-  try {
-    return JSON.parse(text);
-  } catch {
-    // 구조화 파싱 실패 시 본문만이라도 초안으로 반환
-    return {
-      category: '기타',
-      is_escalation: false,
-      draft: text || '(빈 응답)',
-    };
-  }
+  const parsed = extractStructured(text);
+  if (parsed) return parsed;
+
+  // 파싱 완전 실패 시: 원본 JSON 을 그대로 노출하지 않고 안전한 안내로 대체
+  console.error('[claude] 구조화 파싱 실패. 원문 앞부분:', text.slice(0, 200));
+  return {
+    category: '기타',
+    is_escalation: true,
+    draft: '(초안 생성에 문제가 있었습니다. 잠시 후 다시 시도하시거나 상담원이 직접 답변해 주세요.)',
+  };
 }
