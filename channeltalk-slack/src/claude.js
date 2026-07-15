@@ -126,6 +126,9 @@ ${customerMessage}
     body: JSON.stringify({
       model: config.claude.model,
       max_tokens: 2000,
+      // 초안 생성엔 사고(thinking) 불필요. Sonnet 5 는 기본 adaptive thinking 이 켜져
+      // max_tokens 예산을 나눠 써 긴 답변에서 JSON 이 잘릴 수 있으므로 비활성화한다.
+      thinking: { type: 'disabled' },
       system: SYSTEM_PROMPT,
       output_config: { format: { type: 'json_schema', schema: OUTPUT_SCHEMA } },
       messages: [{ role: 'user', content: userContent }],
