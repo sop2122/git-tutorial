@@ -125,10 +125,11 @@ ${customerMessage}
     },
     body: JSON.stringify({
       model: config.claude.model,
-      max_tokens: 2000,
-      // 초안 생성엔 사고(thinking) 불필요. Sonnet 5 는 기본 adaptive thinking 이 켜져
-      // max_tokens 예산을 나눠 써 긴 답변에서 JSON 이 잘릴 수 있으므로 비활성화한다.
-      thinking: { type: 'disabled' },
+      // 판단이 필요한 케이스(에스컬레이션·환불 조건·지표문의 등) 정확도를 위해 adaptive
+      // thinking 을 켠다. 사고 토큰이 예산을 나눠 쓰므로 max_tokens 를 넉넉히(8000) 두어
+      // JSON 초안이 잘리지 않게 한다. (초안은 상담원이 검토 → 약간의 지연/비용은 허용)
+      max_tokens: 8000,
+      thinking: { type: 'adaptive' },
       system: SYSTEM_PROMPT,
       output_config: { format: { type: 'json_schema', schema: OUTPUT_SCHEMA } },
       messages: [{ role: 'user', content: userContent }],
