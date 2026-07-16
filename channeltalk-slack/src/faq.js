@@ -13,6 +13,13 @@ let cache = null;
 
 export async function loadFaq() {
   if (cache !== null) return cache;
+  // 호스팅 배포 환경에서는 지식 베이스를 파일 대신 환경변수(FAQ_CONTENT)로 주입할 수 있다.
+  // (data/faq.md 는 공개 저장소에 올리지 않으므로) 환경변수가 있으면 그것을 우선 사용.
+  const fromEnv = process.env.FAQ_CONTENT;
+  if (fromEnv && fromEnv.trim()) {
+    cache = fromEnv;
+    return cache;
+  }
   try {
     cache = await readFile(FAQ_PATH, 'utf-8');
   } catch {
