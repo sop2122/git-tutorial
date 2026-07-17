@@ -25,15 +25,14 @@ async function slackApi(method, body) {
  * `result` 는 claude.generateDraft 의 반환 객체(category, is_escalation, draft, agent_note, ...).
  * 버튼의 value 에 userChatId 를 실어 나중에 어느 상담에 답장할지 식별한다.
  */
-export function buildBlocks({ customerName, customerMessage, userChatId, result, isReply }) {
+export function buildBlocks({ customerName, customerMessage, result, isReply }) {
   const { category, is_escalation, draft } = result;
-  const payload = JSON.stringify({ userChatId, draft });
 
   // 태그 + 에스컬레이션 배지
   const badges = [`\`${category ?? '기타'}\``];
   if (is_escalation) badges.push('🚨 *확인 후 안내(에스컬레이션)*');
 
-  const blocks = [
+  return [
     {
       type: 'header',
       text: {
@@ -52,27 +51,6 @@ export function buildBlocks({ customerName, customerMessage, userChatId, result,
       type: 'section',
       text: { type: 'mrkdwn', text: `*🤖 추천 답변 초안*\n${draft}` },
     },
-  ];
-
-  blocks.push(
-    {
-      type: 'actions',
-      elements: [
-        {
-          type: 'button',
-          style: is_escalation ? undefined : 'primary',
-          text: { type: 'plain_text', text: '✅ 이대로 보내기', emoji: true },
-          action_id: 'send_draft',
-          value: payload,
-        },
-        {
-          type: 'button',
-          text: { type: 'plain_text', text: '🙈 무시', emoji: true },
-          action_id: 'dismiss',
-          value: payload,
-        },
-      ],
-    },
     {
       type: 'context',
       elements: [
@@ -80,13 +58,11 @@ export function buildBlocks({ customerName, customerMessage, userChatId, result,
           type: 'mrkdwn',
           text: is_escalation
             ? '⚠️ 확인 후 안내 대상입니다. 초안은 표준 안내 문구이니, 실제 확인·처리는 담당 부서로 넘기세요.'
-            : '초안을 수정해 보내려면 채널톡에서 직접 답장하세요. (버튼은 초안 원문 그대로 발송)',
+            : '💡 초안은 참고용입니다. 맥락에 맞게 다듬어 채널톡에서 직접 답변해 주세요.',
         },
       ],
     },
-  );
-
-  return blocks;
+  ];
 }
 
 export async function postInquiry(args) {
@@ -94,13 +70,19 @@ export async function postInquiry(args) {
     channel: config.slack.channelId,
     text: `${args.customerName} 님의 ${args.threadTs ? '추가 메시지' : '새 문의'}`, // 알림 fallback
     blocks: buildBlocks({ ...args, isReply: !!args.threadTs }),
+    // 화면엔 안 보이지만 메시지에 상담ID를 심어둔다. 스레드 묶기(findThreadTs)가
+    // 나중에 같은 상담의 원본 카드를 찾을 때 이 값을 읽는다.
+    metadata: { event_type: 'vibeon_inquiry', event_payload: { userChatId: args.userChatId } },
   };
   if (args.threadTs) body.thread_ts = args.threadTs; // 같은 상담이면 스레드(댓글)로 추가
   return slackApi('chat.postMessage', body);
 }
 
-// 메시지 블록의 버튼 value 에 실어둔 userChatId 를 꺼낸다.
+// 메시지에서 상담ID(userChatId)를 꺼낸다.
+// 우선 메시지 메타데이터에서, 없으면 (구버전 카드의) 버튼 value 에서 읽는다.
 function extractUserChatId(message) {
+  const fromMeta = message.metadata?.event_payload?.userChatId;
+  if (fromMeta) return fromMeta;
   const actions = (message.blocks ?? []).find((b) => b.type === 'actions');
   const btn = actions?.elements?.find((e) => e.value);
   if (!btn) return null;
@@ -123,6 +105,7 @@ export async function findThreadTs({ userChatId, ttlMs }) {
     channel: config.slack.channelId,
     limit: '100',
     oldest: String(oldest),
+    include_all_metadata: 'true', // 메시지에 심어둔 상담ID(metadata)를 함께 받기 위함
   });
   const res = await fetch(`https://slack.com/api/conversations.history?${params}`, {
     headers: { Authorization: `Bearer ${config.slack.botToken}` },
