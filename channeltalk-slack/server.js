@@ -18,12 +18,13 @@ import {
   sendManagerMessage,
 } from './src/channeltalk.js';
 import { generateDraft } from './src/claude.js';
-import { postInquiry, updateMessage, verifySlackSignature } from './src/slack.js';
+import { postInquiry, updateMessage, verifySlackSignature, findThreadTs } from './src/slack.js';
 
 const app = express();
 
 // 같은 상담(userChat)의 메시지는 Slack 스레드로 묶는다: userChatId -> { ts(부모 메시지), lastAt }
-// 서버 재시작 시 초기화됨(그 이후 첫 메시지는 새 스레드로 시작). 마지막 활동 후 TTL 지나면 새 스레드.
+// 이 메모리 표는 '빠른 경로'용 캐시일 뿐이다. 서버가 재시작/휴면(무료 호스팅)으로 표를 잃어도,
+// 슬랙에 남은 메시지를 되짚어(findThreadTs) 스레드를 이어가므로 스레드가 끊기지 않는다.
 const threadByChat = new Map();
 const THREAD_TTL_MS = 12 * 60 * 60 * 1000; // 12시간
 
@@ -51,10 +52,17 @@ app.post(
 
       const result = await generateDraft({ customerMessage: msg.text, history });
 
-      // 같은 상담이면 기존 Slack 메시지의 스레드로 추가
+      // 같은 상담이면 기존 Slack 메시지의 스레드로 추가.
+      // 1) 메모리 캐시(빠른 경로) → 2) 없으면 슬랙 채널을 되짚어 원본 카드 찾기(재시작/휴면 대비)
       const now = Date.now();
       const existing = threadByChat.get(msg.userChatId);
-      const threadTs = existing && now - existing.lastAt < THREAD_TTL_MS ? existing.ts : undefined;
+      let threadTs = existing && now - existing.lastAt < THREAD_TTL_MS ? existing.ts : undefined;
+      if (!threadTs) {
+        threadTs = await findThreadTs({ userChatId: msg.userChatId, ttlMs: THREAD_TTL_MS }).catch((e) => {
+          console.error('[thread-lookup]', e.message);
+          return undefined;
+        });
+      }
 
       const resp = await postInquiry({
         customerName: msg.customerName,

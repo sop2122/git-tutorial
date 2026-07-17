@@ -99,6 +99,45 @@ export async function postInquiry(args) {
   return slackApi('chat.postMessage', body);
 }
 
+// 메시지 블록의 버튼 value 에 실어둔 userChatId 를 꺼낸다.
+function extractUserChatId(message) {
+  const actions = (message.blocks ?? []).find((b) => b.type === 'actions');
+  const btn = actions?.elements?.find((e) => e.value);
+  if (!btn) return null;
+  try {
+    return JSON.parse(btn.value).userChatId ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * 채널의 최근 메시지를 뒤져 같은 상담(userChatId)의 '부모' 카드를 찾아 그 ts 를 돌려준다.
+ * 서버가 재시작/휴면으로 메모리를 잃어도 슬랙에 남은 메시지로 스레드를 이어갈 수 있게 한다.
+ * (conversations.history 는 스레드 답글을 제외한 부모 메시지만 반환하므로 원본 카드가 잡힌다.)
+ * 필요 권한(scope): channels:history (공개 채널) 또는 groups:history (비공개 채널).
+ */
+export async function findThreadTs({ userChatId, ttlMs }) {
+  const oldest = Math.floor((Date.now() - ttlMs) / 1000);
+  const params = new URLSearchParams({
+    channel: config.slack.channelId,
+    limit: '100',
+    oldest: String(oldest),
+  });
+  const res = await fetch(`https://slack.com/api/conversations.history?${params}`, {
+    headers: { Authorization: `Bearer ${config.slack.botToken}` },
+  });
+  const data = await res.json();
+  if (!data.ok) throw new Error(`Slack conversations.history 실패: ${data.error}`);
+
+  // 최신 → 과거 순. 부모 메시지 중 userChatId 가 일치하는 첫 항목의 ts.
+  for (const m of data.messages ?? []) {
+    if (m.thread_ts && m.thread_ts !== m.ts) continue; // 스레드 답글은 스킵
+    if (extractUserChatId(m) === userChatId) return m.ts;
+  }
+  return undefined;
+}
+
 /** 버튼 처리 후 원본 메시지를 결과 텍스트로 교체 */
 export async function updateMessage({ channel, ts, text }) {
   return slackApi('chat.update', { channel, ts, text, blocks: [
