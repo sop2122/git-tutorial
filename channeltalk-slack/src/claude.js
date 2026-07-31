@@ -112,11 +112,23 @@ export async function generateDraft({ customerMessage, history }) {
 
   const faq = await loadFaq();
   const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Seoul' }); // YYYY-MM-DD (KST)
+
+  // 프롬프트 캐싱: 요청마다 반복되는 큰 정적 부분(시스템 프롬프트 + 지식 베이스)을
+  // system 블록으로 올리고, 마지막 정적 블록에 cache_control 을 달아 캐시한다.
+  // 이후 요청은 이 접두사를 캐시에서 읽어(원가의 ~10%) 입력 비용이 크게 준다.
+  // 가변 콘텐츠(오늘 날짜·히스토리·문의)는 캐시 지점 뒤(user 메시지)에 둔다.
+  // TTL 1h: CS 문의가 드문드문·여러 건 몰려 들어와도 캐시가 살아있도록.
+  const system = [
+    { type: 'text', text: SYSTEM_PROMPT },
+    {
+      type: 'text',
+      text: `# 지식 베이스\n${faq || '(지식 베이스 없음)'}`,
+      cache_control: { type: 'ephemeral', ttl: '1h' },
+    },
+  ];
+
   const userContent = `# 오늘 날짜
 ${today}
-
-# 지식 베이스
-${faq || '(지식 베이스 없음)'}
 
 # 이전 대화 히스토리
 ${buildHistoryBlock(history)}
@@ -140,7 +152,7 @@ ${customerMessage}
       // JSON 초안이 잘리지 않게 한다. (초안은 상담원이 검토 → 약간의 지연/비용은 허용)
       max_tokens: 8000,
       thinking: { type: 'adaptive' },
-      system: SYSTEM_PROMPT,
+      system,
       output_config: { format: { type: 'json_schema', schema: OUTPUT_SCHEMA } },
       messages: [{ role: 'user', content: userContent }],
     }),
@@ -150,6 +162,13 @@ ${customerMessage}
     throw new Error(`Claude 초안 생성 실패: ${res.status} ${await res.text()}`);
   }
   const data = await res.json();
+
+  // 캐시 동작 확인용 로그. cache_read 가 0보다 크면 캐시에서 읽은 것(비용 90% 절감).
+  const u = data.usage ?? {};
+  console.log(
+    `[claude] 토큰 usage — 입력:${u.input_tokens ?? 0} 캐시쓰기:${u.cache_creation_input_tokens ?? 0} 캐시읽기:${u.cache_read_input_tokens ?? 0} 출력:${u.output_tokens ?? 0}`,
+  );
+
   const text = data.content?.map((b) => b.text ?? '').join('').trim() || '';
 
   const parsed = extractStructured(text);
